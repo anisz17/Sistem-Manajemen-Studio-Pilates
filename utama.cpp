@@ -637,12 +637,15 @@ void bookingKelas(Akun *data, int jumlahAkun, string namaLogin, Booking *dataBoo
     catch (const exception &e)
     {
         cout << "\n"
-             << e.what() << "\n";
+            << e.what() << "\n";
     }
 }
 
 void riwayatTransaksi(Booking *dataBooking, int jumlahBooking, string namaLogin)
 {
+    // bagian intan
+    // intan
+    cout << "intan aja" << endl;
     system("cls");
     cetakHeader("RIWAYAT TRANSAKSI");
 }
