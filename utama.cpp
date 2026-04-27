@@ -424,6 +424,7 @@ void hapusMember(Akun *data, int &jumlah)
 
 void tambahJadwal(JadwalKelas *dataJadwal, int &jumlahJadwal, int maxJadwal)
 {
+    cout << "Halo halo";
     system("cls");
     cetakHeader("TAMBAH JADWAL KELAS");
 }
