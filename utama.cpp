@@ -113,6 +113,12 @@ struct Booking
     string status;
 };
 
+struct TopUp
+{
+    string namaMember;
+    int nominal;
+};
+
 int cariusername(Akun *data, int jumlah, string targetNama, int index = 0)
 {
     if (index >= jumlah)
@@ -185,7 +191,7 @@ void login(Akun *data, int jumlah, bool &statusLogin, string &namaLogin, string 
                 kesempatan--;
                 if (kesempatan > 0)
                     cout << "\nLogin Gagal! Nama atau Password salah.\n"
-                         << "Sisa kesempatan: " << kesempatan << "\n";
+                        << "Sisa kesempatan: " << kesempatan << "\n";
                 else
                 {
                     cout << "\nKesempatan Anda Habis. Annyeong\n";
@@ -196,7 +202,7 @@ void login(Akun *data, int jumlah, bool &statusLogin, string &namaLogin, string 
         catch (const exception &e)
         {
             cout << "\n"
-                 << e.what() << "\n";
+                << e.what() << "\n";
             kesempatan--;
             if (kesempatan > 0)
                 cout << "Sisa kesempatan: " << kesempatan << "\n";
@@ -232,7 +238,7 @@ void registrasi(Akun *data, int &jumlah, int maxKapasitas)
     catch (const exception &e)
     {
         cout << "\n"
-             << e.what() << "\n";
+            << e.what() << "\n";
     }
 }
 
@@ -274,7 +280,7 @@ void tambahMember(Akun *data, int &jumlah, int maxKapasitas)
     catch (const exception &e)
     {
         cout << "\n"
-             << e.what() << "\n";
+            << e.what() << "\n";
     }
 }
 
@@ -331,8 +337,8 @@ void lihatMember(Akun *data, int jumlah)
                 cetakGaris('=', 64);
                 for (int i = 0; i < memberCount; i++)
                     cout << left << setw(8) << temp[i].id << setw(15) << temp[i].nama
-                         << setw(15) << temp[i].kelas.jenis
-                         << formatRupiah(temp[i].kelas.harga) << "\n";
+                        << setw(15) << temp[i].kelas.jenis
+                        << formatRupiah(temp[i].kelas.harga) << "\n";
                 cetakGaris('=', 64);
                 system("pause");
             }
@@ -392,7 +398,7 @@ void lihatMember(Akun *data, int jumlah)
         catch (const exception &e)
         {
             cout << "\n"
-                 << e.what() << "\n";
+                << e.what() << "\n";
             system("pause");
         }
     }
@@ -418,7 +424,7 @@ void hapusMember(Akun *data, int &jumlah)
     catch (const exception &e)
     {
         cout << "\n"
-             << e.what() << "\n";
+            << e.what() << "\n";
     }
 }
 
@@ -458,8 +464,8 @@ void approvalBooking(Booking *dataBooking, int jumlahBooking, Akun *dataAkun, in
     }
     cetakGaris('=', 80);
     cout << left << setw(10) << "Booking ID" << setw(15) << "Nama Member"
-         << setw(12) << "Member ID" << setw(15) << "Kelas"
-         << setw(15) << "Harga" << "Status" << endl;
+        << setw(12) << "Member ID" << setw(15) << "Kelas"
+        << setw(15) << "Harga" << "Status" << endl;
     cetakGaris('=', 80);
 
     bool adaPending = false;
@@ -469,11 +475,11 @@ void approvalBooking(Booking *dataBooking, int jumlahBooking, Akun *dataAkun, in
         {
             adaPending = true;
             cout << left << setw(10) << dataBooking[i].bookingID
-                 << setw(15) << dataBooking[i].namaMember
-                 << setw(12) << dataBooking[i].memberID
-                 << setw(15) << dataBooking[i].jenisKelas
-                 << setw(15) << formatRupiah(dataBooking[i].harga)
-                 << dataBooking[i].status << endl;
+                << setw(15) << dataBooking[i].namaMember
+                << setw(12) << dataBooking[i].memberID
+                << setw(15) << dataBooking[i].jenisKelas
+                << setw(15) << formatRupiah(dataBooking[i].harga)
+                << dataBooking[i].status << endl;
         }
     }
 
@@ -535,7 +541,7 @@ void approvalBooking(Booking *dataBooking, int jumlahBooking, Akun *dataAkun, in
     catch (const exception &e)
     {
         cout << "\n"
-             << e.what() << "\n";
+            << e.what() << "\n";
     }
 }
 
@@ -545,7 +551,7 @@ void ProfilSaya(Akun *data, int jumlah, string namaLogin)
     cetakHeader("PROFIL SAYA");
 }
 
-void topUpSaldo(Akun *data, int jumlah, string namaLogin)
+void topUpSaldo(Akun *data, int jumlah, string namaLogin, TopUp dataTopUp[], int &jumlahTopUp)
 {
     system("cls");
     cetakHeader("TOP UP SALDO");
@@ -563,13 +569,18 @@ void topUpSaldo(Akun *data, int jumlah, string namaLogin)
             throw invalid_argument("Nominal harus lebih dari 0!");
 
         data[index].saldo += nominal;
+
+        dataTopUp[jumlahTopUp].namaMember = namaLogin;
+        dataTopUp[jumlahTopUp].nominal = nominal;
+        jumlahTopUp++;
+
         cout << "\nTop up berhasil!" << endl;
         cout << "Saldo baru: " << formatRupiah(data[index].saldo) << endl;
     }
     catch (const exception &e)
     {
         cout << "\n"
-             << e.what() << "\n";
+            << e.what() << "\n";
     }
 }
 
@@ -641,20 +652,88 @@ void bookingKelas(Akun *data, int jumlahAkun, string namaLogin, Booking *dataBoo
     }
 }
 
-void riwayatTransaksi(Booking *dataBooking, int jumlahBooking, string namaLogin)
+void riwayatTransaksi(Booking *dataBooking, int jumlahBooking, string namaLogin, TopUp dataTopUp[], int jumlahTopUp)
 {
-    // bagian intan
-    // intan
-    cout << "intan aja" << endl;
     system("cls");
     cetakHeader("RIWAYAT TRANSAKSI");
+    cout << "Member: " << namaLogin << endl;
+    bool kembali = false;
+    while(!kembali){
+        cout << "Pilih Riwayat Transaksi\n";
+        cout << "1. Riwayat Booking\n";
+        cout << "2. Riwayat TopUp\n";
+        cout << "3. Riwayat Canceled\n";
+        cout << "0. Kembali\n";
+        try{
+            int pilihriwayat = inputInteger("Pilihan (0-3): ");
+            if (pilihriwayat == 0) {
+                kembali = true;
+                continue;
+            }
+            if (pilihriwayat == 1){
+                cout << "\nRiwayat Booking Kelas:\n";
+                cetakGaris('=', 65);
+                cout << left << setw(15) << "ID Booking " << setw(20) << "Sesi " << setw(17) << "Harga " << setw (19) << "Status" << endl;
+                cetakGaris('=', 65);
+                bool adaTransaksi = false;
+                for (int i = 0; i < jumlahBooking; i++)
+                {
+                    if (dataBooking[i].namaMember == namaLogin)
+                    {
+                        adaTransaksi = true;
+                        string statusDisplay;
+                        if (dataBooking[i].status == "approved") statusDisplay = "Approved";
+                        else if (dataBooking[i].status == "pending") statusDisplay = "Pending";
+                        else if (dataBooking[i].status == "rejected") statusDisplay = "Rejected";
+                        else if (dataBooking[i].status == "canceled") statusDisplay = "Canceled";
+                        else statusDisplay = dataBooking[i].status;
+                        cout << left << setw(15) << dataBooking[i].bookingID
+                        << setw(20) << dataBooking[i].jenisKelas
+                        << setw(17) << formatRupiah(dataBooking[i].harga)
+                        << setw(19) << statusDisplay << endl;
+                    }
+                }
+                if (!adaTransaksi){
+                    cout << " [  Belum ada Riwayat Booking. ]\n";
+                }
+            }
+            else if (pilihriwayat == 2){
+                cout << "\n Riwayat Top Up Saldo\n";
+                cetakGaris('=', 65);
+                cout << left << setw(30) << "Nama Member" << setw(20) << "Nominal Top Up" << endl;
+                cetakGaris('=', 65);
+                bool adaTopUp = false;
+                for (int i = 0; i < jumlahTopUp; i++){
+                    if (dataTopUp[i].namaMember == namaLogin){
+                        adaTopUp = true;
+                        cout << left << setw(30) << dataTopUp[i].namaMember
+                        << setw(20) << formatRupiah(dataTopUp[i].nominal) << endl;
+                    }
+                }
+                if (!adaTopUp){
+                    cout << " [  Belum ada Riwayat Top Up Saldo. ]\n";
+                }
+            }
+            else if (pilihriwayat == 3){
+                cout << "\nRiwayat Booking yang Dibatalkan\n";
+                cout << "[ Masih Dalam Proses Pengerjaan di Menu User ]\n";
+            }
+            else{
+                throw out_of_range("Pilihan tidak valid!");
+            }
+        }
+        catch(const exception &e){
+            cout << "\n" << e.what() << "\n";
+        }
+        cetakGaris('=', 65);
+    }
 }
-
 int main()
 {
     const int MAX = 20;
     const int MAX_BOOKING = 50;
     const int MAX_JADWAL = 30;
+    const int MAX_TOPUP = 50;
 
     Akun dataAkun[MAX];
     int jumlah = 2;
@@ -663,6 +742,9 @@ int main()
 
     Booking dataBooking[MAX_BOOKING];
     int jumlahBooking = 0;
+
+    TopUp dataTopUp[MAX_TOPUP];
+    int jumlahTopUp = 0;
 
     JadwalKelas dataJadwal[MAX_JADWAL];
     int jumlahJadwal = 0;
@@ -704,7 +786,7 @@ int main()
             catch (const exception &e)
             {
                 cout << "\n"
-                     << e.what() << "\n";
+                    << e.what() << "\n";
                 system("pause");
             }
         }
@@ -779,7 +861,7 @@ int main()
                 catch (const exception &e)
                 {
                     cout << "\n"
-                         << e.what() << "\n";
+                        << e.what() << "\n";
                     system("pause");
                 }
             }
@@ -803,7 +885,7 @@ int main()
                     }
                     else if (pilihan == 2)
                     {
-                        topUpSaldo(ptrAkun, jumlah, namaLogin);
+                        topUpSaldo(ptrAkun, jumlah, namaLogin, dataTopUp, jumlahTopUp);
                         system("pause");
                     }
                     else if (pilihan == 3)
@@ -813,7 +895,7 @@ int main()
                     }
                     else if (pilihan == 4)
                     {
-                        riwayatTransaksi(dataBooking, jumlahBooking, namaLogin);
+                        riwayatTransaksi(dataBooking, jumlahBooking, namaLogin, dataTopUp, jumlahTopUp);
                         system("pause");
                     }
                     else if (pilihan == 0)
@@ -830,7 +912,7 @@ int main()
                 catch (const exception &e)
                 {
                     cout << "\n"
-                         << e.what() << "\n";
+                        << e.what() << "\n";
                     system("pause");
                 }
             }
