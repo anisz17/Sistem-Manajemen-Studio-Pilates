@@ -542,6 +542,9 @@ void approvalBooking(Booking *dataBooking, int jumlahBooking, Akun *dataAkun, in
 void ProfilSaya(Akun *data, int jumlah, string namaLogin)
 {
     system("cls");
+    cout << "Selamat Datang, " ;
+    string pilihan;
+    cin >> pilihan;
     cetakHeader("PROFIL SAYA");
 }
 
