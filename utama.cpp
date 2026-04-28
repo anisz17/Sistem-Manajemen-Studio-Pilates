@@ -632,10 +632,42 @@ void approvalBooking(Booking *dataBooking, int jumlahBooking, Akun *dataAkun, in
 void ProfilSaya(Akun *data, int jumlah, string namaLogin)
 {
     system("cls");
-    cout << "Selamat Datang, " ;
-    string pilihan;
-    cin >> pilihan;
-    cetakHeader("PROFIL SAYA");
+    try
+    {
+        int index = cariusername(data, jumlah, namaLogin);
+        if (index == -1)
+            throw runtime_error("Profil tidak ditemukan.");
+
+        cetakHeader("PROFIL ANDA");
+        cout << left << setw(10) << "ID" << ": " << data[index].id << endl;
+        cout << left << setw(10) << "Nama" << ": " << data[index].nama << endl;
+        cout << left << setw(10) << "Password" << ": " << data[index].pw << endl;
+        cout << left << setw(10) << "Kelas" << ": " << data[index].kelas.jenis << endl;
+        cout << left << setw(10) << "Harga" << ": " << formatRupiah(data[index].kelas.harga) << endl;
+        cout << left << setw(10) << "Saldo" << ": " << formatRupiah(data[index].saldo) << endl;
+        cout << "\n[ Ingin mengubah password? ]\n";
+        cout << "1. Ya\n";
+        cout << "2. Tidak\n";
+        int pilihan = inputInteger("Pilihan (1/2): ");
+        if (pilihan == 1)
+        {
+            string pwBaru;
+            cout << "Masukkan password baru: ";
+            cin >> pwBaru;
+            validasiPassword(pwBaru);
+            data[index].pw = pwBaru;
+            cout << "\nPassword berhasil diubah!\n";
+        }
+        if (pilihan != 1 && pilihan != 2)
+            throw out_of_range("Pilihan tidak valid!");
+            
+        cetakGaris('=', 50);
+    }
+    catch (const exception &e)
+    {
+        cout << "\n"
+             << e.what() << "\n";
+    }
 }
 
 void topUpSaldo(Akun *data, int jumlah, string namaLogin)
