@@ -426,24 +426,114 @@ void tambahJadwal(JadwalKelas *dataJadwal, int &jumlahJadwal, int maxJadwal)
 {
     system("cls");
     cetakHeader("TAMBAH JADWAL KELAS");
+
+    if (jumlahJadwal < maxJadwal) {
+        dataJadwal[jumlahJadwal].jadwalID = jumlahJadwal + 1;
+        
+        cin.ignore();
+        cout << "Nama Kelas       : "; getline(cin, dataJadwal[jumlahJadwal].namaKelas);
+        cout << "Jenis Kelas      : "; getline(cin, dataJadwal[jumlahJadwal].jenisKelas);
+        cout << "Hari             : "; getline(cin, dataJadwal[jumlahJadwal].hari);
+        cout << "Waktu (HH:MM)    : "; getline(cin, dataJadwal[jumlahJadwal].waktu);
+        cout << "Instruktur       : "; getline(cin, dataJadwal[jumlahJadwal].instruktur);
+        
+        // Menggunakan inputInteger jika kamu punya fungsinya, jika tidak gunakan cin >>
+        cout << "Kapasitas Peserta: "; 
+        cin >> dataJadwal[jumlahJadwal].kapasitas;
+        
+        dataJadwal[jumlahJadwal].terisi = 0; // Default kosong
+
+        jumlahJadwal++;
+        cout << "\n[Sukses] Jadwal Berhasil Ditambahkan!";
+    } else {
+        cout << "\n[Gagal] Kuota penyimpanan jadwal penuh!";
+    }
 }
 
 void lihatJadwal(JadwalKelas *dataJadwal, int jumlahJadwal)
 {
     system("cls");
-    cetakHeader("JADWAL KELAS");
+    cetakHeader("DAFTAR JADWAL KELAS");
+
+    if (jumlahJadwal == 0) {
+        cout << "Data jadwal masih kosong.\n";
+    } else {
+        cout << "ID | Nama Kelas | Jenis | Hari | Waktu | Instruktur | Sisa Kuota\n";
+        cetakGaris('-', 80);
+        for (int i = 0; i < jumlahJadwal; i++) {
+            int sisa = dataJadwal[i].kapasitas - dataJadwal[i].terisi;
+            cout << dataJadwal[i].jadwalID << " | "
+                 << dataJadwal[i].namaKelas << " | "
+                 << dataJadwal[i].jenisKelas << " | "
+                 << dataJadwal[i].hari << " | "
+                 << dataJadwal[i].waktu << " | "
+                 << dataJadwal[i].instruktur << " | "
+                 << sisa << "/" << dataJadwal[i].kapasitas << endl;
+        }
+    }
 }
 
 void updateJadwal(JadwalKelas *dataJadwal, int jumlahJadwal)
 {
     system("cls");
     cetakHeader("UPDATE JADWAL KELAS");
+
+    if (jumlahJadwal == 0) {
+        cout << "Data kosong!\n";
+        return;
+    }
+
+    int idCari = inputInteger("Masukkan ID Jadwal yang ingin diubah: ");
+    bool ditemukan = false;
+
+    for (int i = 0; i < jumlahJadwal; i++) {
+        if (dataJadwal[i].jadwalID == idCari) {
+            ditemukan = true;
+            cout << "--- Data Baru ---\n";
+            cin.ignore();
+            cout << "Nama Kelas : "; getline(cin, dataJadwal[i].namaKelas);
+            cout << "Hari       : "; getline(cin, dataJadwal[i].hari);
+            cout << "Waktu      : "; getline(cin, dataJadwal[i].waktu);
+            cout << "Instruktur : "; getline(cin, dataJadwal[i].instruktur);
+            cout << "Kapasitas  : "; cin >> dataJadwal[i].kapasitas;
+            
+            cout << "\n[Sukses] Data Berhasil Diperbarui!";
+            break;
+        }
+    }
+
+    if (!ditemukan) cout << "\n[Gagal] ID Jadwal tidak ditemukan.";
 }
 
 void hapusJadwal(JadwalKelas *dataJadwal, int &jumlahJadwal)
 {
     system("cls");
     cetakHeader("HAPUS JADWAL KELAS");
+
+    if (jumlahJadwal == 0) {
+        cout << "Data kosong!\n";
+        return;
+    }
+
+    int idCari = inputInteger("Masukkan ID Jadwal yang ingin dihapus: ");
+    int indexKetemu = -1;
+
+    for (int i = 0; i < jumlahJadwal; i++) {
+        if (dataJadwal[i].jadwalID == idCari) {
+            indexKetemu = i;
+            break;
+        }
+    }
+
+    if (indexKetemu != -1) {
+        for (int i = indexKetemu; i < jumlahJadwal - 1; i++) {
+            dataJadwal[i] = dataJadwal[i + 1];
+        }
+        jumlahJadwal--;
+        cout << "\n[Sukses] Jadwal Berhasil Dihapus!";
+    } else {
+        cout << "\n[Gagal] ID tidak ditemukan.";
+    }
 }
 
 void approvalBooking(Booking *dataBooking, int jumlahBooking, Akun *dataAkun, int jumlahAkun)
@@ -600,7 +690,7 @@ void bookingKelas(Akun *data, int jumlahAkun, string namaLogin, Booking *dataBoo
         int harga;
 
         if (pilihan == 1)
-        {
+        {   
             jenisKelas = "private";
             harga = 1000000;
         }
