@@ -4,7 +4,52 @@
 #include <iomanip>
 #include <cmath>
 #include <stdexcept>
+#include <windows.h>
+#include <cctype>
 using namespace std;
+
+void setColor(int color)
+{
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
+}
+
+void tampilkanLogoKecil()
+{
+    cout << "\n";
+    cout << "====================================================\n";
+    cout << "||               STUDIO PILATES MANIAK            ||\n";
+    cout << "====================================================\n";
+}
+
+void loadingAnimation()
+{
+    setColor(14);
+    cout << "\nLoading";
+    for (int i = 0; i < 5; i++)
+    {
+        Sleep(200);
+        cout << ".";
+        cout.flush();
+    }
+    cout << "\n";
+    setColor(7);
+}
+
+void countdown(int detik)
+{
+    setColor(12);
+    cout << "\nTerlalu banyak percobaan gagal!\n";
+    setColor(14);
+    cout << "Silakan tunggu ";
+    for (int i = detik; i > 0; i--)
+    {
+        cout << i << "...";
+        cout.flush();
+        Sleep(1000);
+    }
+    cout << "\n\n";
+    setColor(7);
+}
 
 int inputInteger(const string &prompt)
 {
@@ -20,21 +65,81 @@ int inputInteger(const string &prompt)
     return nilai;
 }
 
-void validasiKelas(const string &kelas)
-{
-    if (kelas != "private" && kelas != "Private" && kelas != "PRIVATE" &&
-        kelas != "reguler" && kelas != "Reguler" && kelas != "REGULER")
-        throw invalid_argument("Kelas tidak valid! Pilih 'private' atau 'reguler'.");
-}
-
-void validasiUsername(const string &nama)
+void validasiUsernameHuruf(const string &nama)
 {
     if (nama.empty() || nama == " ")
         throw invalid_argument("Username tidak boleh kosong!");
+
+    if (nama.length() < 4)
+        throw invalid_argument("Username minimal 4 karakter!");
+    for (int i = 0; i < nama.length(); i++)
+    {
+        if (!isalpha(nama[i]) && nama[i] != ' ')
+        {
+            throw invalid_argument("Username hanya boleh huruf dan spasi!");
+        }
+    }
+
+    bool semuaSpasi = true;
+    for (int i = 0; i < nama.length(); i++)
+    {
+        if (nama[i] != ' ')
+        {
+            semuaSpasi = false;
+            break;
+        }
+    }
+
+    if (semuaSpasi)
+        throw invalid_argument("Username tidak boleh hanya berisi spasi!");
+}
+
+void validasiHari(const string &hari)
+{
+    if (hari.empty())
+        throw invalid_argument("Hari tidak boleh kosong!");
+
+    for (int i = 0; i < hari.length(); i++)
+    {
+        if (!isalpha(hari[i]) && hari[i] != ' ')
+        {
+            throw invalid_argument("Hari hanya boleh berisi huruf!");
+        }
+    }
+}
+
+void validasiJam(const string &jam)
+{
+    if (jam.empty())
+        throw invalid_argument("Jam tidak boleh kosong!");
+
+    for (int i = 0; i < jam.length(); i++)
+    {
+        if (!isdigit(jam[i]) && jam[i] != ':' && jam[i] != '-' && jam[i] != ' ')
+        {
+            throw invalid_argument("Format jam tidak valid! Gunakan format: 08:00 - 09:00");
+        }
+    }
+}
+
+void validasiTeksHuruf(const string &teks, const string &namaField)
+{
+    if (teks.empty())
+        throw invalid_argument(namaField + " tidak boleh kosong!");
+
+    for (int i = 0; i < teks.length(); i++)
+    {
+        if (!isalpha(teks[i]) && teks[i] != ' ')
+        {
+            throw invalid_argument(namaField + " hanya boleh berisi huruf dan spasi!");
+        }
+    }
 }
 
 void validasiPassword(const string &pw)
 {
+    if (pw.empty())
+        throw invalid_argument("Password tidak boleh kosong!");
     if ((int)pw.length() < 3)
         throw length_error("Password terlalu pendek! Minimal 3 karakter.");
 }
@@ -58,35 +163,11 @@ string formatRupiah(int harga)
     return ss.str();
 }
 
-void cetakGaris(char karakter = '=', int panjang = 50)
-{
-    for (int i = 0; i < panjang; i++)
-        cout << karakter;
-    cout << endl;
-}
-
-void cetakHeader(const string &judul)
-{
-    cetakGaris('=', 50);
-    int spasi = (50 - (int)judul.length()) / 2;
-    for (int i = 0; i < spasi; i++)
-        cout << " ";
-    cout << judul << endl;
-    cetakGaris('=', 50);
-}
-
-struct Kelas
-{
-    string jenis;
-    int harga;
-};
-
 struct Akun
 {
     string nama;
     string pw;
     string role;
-    Kelas kelas;
     int id;
     int saldo;
 };
@@ -94,11 +175,12 @@ struct Akun
 struct JadwalKelas
 {
     int jadwalID;
-    string namaKelas;
-    string jenisKelas;
     string hari;
-    string waktu;
+    string jam;
+    string jenisKelas;
+    string kategori;
     string instruktur;
+    int harga;
     int kapasitas;
     int terisi;
 };
@@ -108,9 +190,16 @@ struct Booking
     int bookingID;
     string namaMember;
     int memberID;
+    int jadwalID;
     string jenisKelas;
     int harga;
     string status;
+};
+
+struct TopUp
+{
+    string namaMember;
+    int nominal;
 };
 
 int cariusername(Akun *data, int jumlah, string targetNama, int index = 0)
@@ -132,70 +221,142 @@ int cariID(Akun *data, int jumlah, int targetID)
 
 void tampilkanDaftarMember(Akun *data, int jumlah)
 {
-    cetakGaris('=', 64);
-    cout << "                       DAFTAR MEMBER\n";
-    cetakGaris('=', 64);
-    cout << left << setw(8) << "ID" << setw(15) << "Nama" << setw(15) << "Kelas" << "Harga" << endl;
-    cetakGaris('=', 64);
+    cout << "\n";
+    cout << "=======================================================\n";
+    cout << "||                >> DAFTAR MEMBER TERDAFTAR <<      ||\n";
+    cout << "=======================================================\n";
+
+    cout << left << setw(8) << "ID" << setw(20) << "Nama" << setw(20) << "Saldo" << endl;
+    cout << "-------------------------------------------------------\n";
+
     bool ada = false;
     for (int i = 0; i < jumlah; i++)
     {
         if (data[i].role == "member")
         {
             ada = true;
-            cout << left << setw(8) << data[i].id << setw(15) << data[i].nama;
-            cout << setw(15) << data[i].kelas.jenis << formatRupiah(data[i].kelas.harga) << "\n";
+            cout << left << setw(8) << data[i].id;
+            cout << setw(20) << data[i].nama;
+            cout << setw(20) << formatRupiah(data[i].saldo) << "\n";
         }
     }
     if (!ada)
-        cout << "Belum ada data member terdaftar \n";
-    cetakGaris('=', 64);
+    {
+        cout << "Belum ada data member terdaftar !\n";
+    }
+    cout << "================================================================\n";
+}
+
+void tampilkanDaftarJadwal(JadwalKelas *dataJadwal, int jumlahJadwal)
+{
+    cout << "\n";
+    cout << "================================================================================================\n";
+    cout << "||                                DAFTAR JADWAL KELAS                                         ||\n";
+    cout << "================================================================================================\n";
+
+    cout << left
+         << setw(5) << "ID"
+         << setw(10) << "Hari"
+         << setw(15) << "Jam"
+         << setw(18) << "Jenis"
+         << setw(15) << "Kategori"
+         << setw(15) << "Instruktur"
+         << setw(12) << "Harga"
+         << "Kapasitas" << endl;
+    cout << "------------------------------------------------------------------------------------------------\n";
+
+    if (jumlahJadwal == 0)
+    {
+        cout << "Belum ada data jadwal !\n";
+    }
+    else
+    {
+        for (int i = 0; i < jumlahJadwal; i++)
+        {
+            int sisa = dataJadwal[i].kapasitas - dataJadwal[i].terisi;
+
+            cout << "    " << left << setw(5) << dataJadwal[i].jadwalID;
+            cout << setw(10) << dataJadwal[i].hari;
+            cout << setw(15) << dataJadwal[i].jam;
+            cout << setw(18) << dataJadwal[i].jenisKelas;
+            cout << setw(15) << dataJadwal[i].kategori;
+            cout << setw(15) << dataJadwal[i].instruktur;
+            cout << setw(12) << formatRupiah(dataJadwal[i].harga);
+            cout << dataJadwal[i].terisi << "/" << dataJadwal[i].kapasitas
+                 << " (sisa " << sisa << ")" << endl;
+        }
+    }
+
+    cout << "================================================================================================\n";
 }
 
 void login(Akun *data, int jumlah, bool &statusLogin, string &namaLogin, string &roleLogin)
 {
     system("cls");
-    cetakHeader("LAMAN LOGIN");
+    tampilkanLogoKecil();
+    cout << "====================================================\n";
+    cout << "||                >> LOGIN SYSTEM <<              ||\n";
+    cout << "====================================================\n";
     string inputNama, inputpw;
     int kesempatan = 3;
+    cin.ignore(1000, '\n');
 
     while (kesempatan > 0)
     {
         try
         {
-            cin.ignore(1000, '\n');
-            cout << "Masukkan Nama (Username) : ";
-            getline(cin, inputNama);
-            validasiUsername(inputNama);
-            cout << "Masukkan Password        : ";
-            cin >> inputpw;
+            bool usernameValid = false;
+            while (!usernameValid)
+            {
+                try
+                {
+                    cout << "Masukkan Username : ";
+                    getline(cin, inputNama);
+                    validasiUsernameHuruf(inputNama);
+                    usernameValid = true;
+                }
+                catch (const exception &e)
+                {
+                    cout << endl
+                         << e.what() << "\n";
+                    cout << "Silakan masukkan username kembali.\n\n";
+                }
+            }
 
+            cout << "Masukkan Password : ";
+            cin >> inputpw;
             int index = cariusername(data, jumlah, inputNama);
             if (index != -1 && data[index].pw == inputpw)
             {
                 statusLogin = true;
                 namaLogin = data[index].nama;
                 roleLogin = data[index].role;
-                cout << "\nLogin berhasil. Halo " << namaLogin << " sebagai " << roleLogin << "!\n";
+
+                loadingAnimation();
+                cout << "Login berhasil!\n";
+                cout << "Selamat datang, " << namaLogin << " (" << roleLogin << ")!\n\n";
                 system("pause");
                 return;
             }
             else
             {
                 kesempatan--;
+                cout << "\nLogin Gagal! Username atau Password salah.\n";
                 if (kesempatan > 0)
-                    cout << "\nLogin Gagal! Nama atau Password salah.\n"
-                         << "Sisa kesempatan: " << kesempatan << "\n";
+                {
+                    cout << "Sisa kesempatan: " << kesempatan << "\n\n";
+                }
                 else
                 {
-                    cout << "\nKesempatan Anda Habis. Annyeong\n";
+                    cout << "\nKesempatan Anda Habis!\n";
+                    countdown(5);
                     system("pause");
                 }
             }
         }
         catch (const exception &e)
         {
-            cout << "\n"
+            cout << endl
                  << e.what() << "\n";
             kesempatan--;
             if (kesempatan > 0)
@@ -203,6 +364,7 @@ void login(Akun *data, int jumlah, bool &statusLogin, string &namaLogin, string 
             else
             {
                 cout << "Kesempatan Habis.\n";
+                countdown(5);
                 system("pause");
             }
         }
@@ -212,69 +374,95 @@ void login(Akun *data, int jumlah, bool &statusLogin, string &namaLogin, string 
 void registrasi(Akun *data, int &jumlah, int maxKapasitas)
 {
     system("cls");
-    cetakHeader("REGISTRASI AKUN");
+    tampilkanLogoKecil();
+    cout << "====================================================\n";
+    cout << "||            >> REGISTRASI AKUN BARU <<          ||\n";
+    cout << "====================================================\n";
     cin.ignore(1000, '\n');
     try
     {
         validasiKapasitas(jumlah, maxKapasitas);
-        string namaBaru, pwBaru, kelasBaru;
-        cout << "Masukkan Nama (Username)     : ";
+        string namaBaru, pwBaru;
+
+        cout << "Masukkan Username : ";
         getline(cin, namaBaru);
-        validasiUsername(namaBaru);
+
+        validasiUsernameHuruf(namaBaru);
+
         if (cariusername(data, jumlah, namaBaru) != -1)
             throw runtime_error("Username sudah terdaftar. Gunakan username lain.");
 
-        cout << "Masukkan Password            : ";
+        cout << "Masukkan Password : ";
         cin >> pwBaru;
         validasiPassword(pwBaru);
-        cout << "\nRegistrasi Berhasil! Silakan Login.\n";
-    }
-    catch (const exception &e)
-    {
-        cout << "\n"
-             << e.what() << "\n";
-    }
-}
-
-void tambahMember(Akun *data, int &jumlah, int maxKapasitas)
-{
-    system("cls");
-    cetakHeader("TAMBAH MEMBER");
-    cin.ignore(1000, '\n');
-    try
-    {
-        validasiKapasitas(jumlah, maxKapasitas);
-
-        string namaBaru, pwBaru, kelasBaru;
-        cout << "Nama Member (Username)  : ";
-        getline(cin, namaBaru);
-        validasiUsername(namaBaru);
-
-        if (cariusername(data, jumlah, namaBaru) != -1)
-            throw runtime_error("Username sudah terdaftar.");
-
-        cout << "Password Member         : ";
-        cin >> pwBaru;
-        validasiPassword(pwBaru);
-
-        cout << "Kelas (private/reguler) : ";
-        cin >> kelasBaru;
-        validasiKelas(kelasBaru);
 
         int newID = 1;
         for (int i = 0; i < jumlah; i++)
             if (data[i].role == "member" && data[i].id >= newID)
                 newID = data[i].id + 1;
 
-        int hargaKelas = (kelasBaru == "private" || kelasBaru == "Private" || kelasBaru == "PRIVATE") ? 1000000 : 450000;
-        data[jumlah] = {namaBaru, pwBaru, "member", {kelasBaru, hargaKelas}, newID, 0};
+        data[jumlah].nama = namaBaru;
+        data[jumlah].pw = pwBaru;
+        data[jumlah].role = "member";
+        data[jumlah].id = newID;
+        data[jumlah].saldo = 0;
         jumlah++;
-        cout << "\nMember berhasil ditambahkan!\n";
+
+        loadingAnimation();
+        cout << "Registrasi Berhasil! Silakan Login.\n";
+        cout << "ID Anda: " << newID << "\n";
     }
     catch (const exception &e)
     {
-        cout << "\n"
-             << e.what() << "\n";
+        cout << endl
+             << e.what() << "\n\n";
+    }
+}
+
+void tambahMember(Akun *data, int &jumlah, int maxKapasitas)
+{
+    system("cls");
+    tampilkanLogoKecil();
+    cout << "====================================================\n";
+    cout << "||             >> TAMBAH MEMBER BARU <<           ||\n";
+    cout << "====================================================\n";
+    cin.ignore(1000, '\n');
+    try
+    {
+        validasiKapasitas(jumlah, maxKapasitas);
+        string namaBaru, pwBaru;
+        cout << "Masukkan Nama Member : ";
+        getline(cin, namaBaru);
+
+        validasiUsernameHuruf(namaBaru);
+
+        if (cariusername(data, jumlah, namaBaru) != -1)
+            throw runtime_error("Username sudah terdaftar.");
+
+        cout << "Masukkan Password Member : ";
+        cin >> pwBaru;
+        validasiPassword(pwBaru);
+
+        int newID = 1;
+        for (int i = 0; i < jumlah; i++)
+            if (data[i].role == "member" && data[i].id >= newID)
+                newID = data[i].id + 1;
+
+        data[jumlah].nama = namaBaru;
+        data[jumlah].pw = pwBaru;
+        data[jumlah].role = "member";
+        data[jumlah].id = newID;
+        data[jumlah].saldo = 0;
+        jumlah++;
+
+        loadingAnimation();
+        cout << "Member Berhasil Ditambahkan!\n";
+        cout << "ID Member: " << newID << "\n\n";
+    }
+    catch (const exception &e)
+    {
+        cout << endl
+             << e.what() << "\n\n";
     }
 }
 
@@ -284,22 +472,24 @@ void lihatMember(Akun *data, int jumlah)
     while (!kembali)
     {
         system("cls");
-        cetakHeader("LIHAT DATA MEMBER");
-        cout << "1. Urutkan Kelas (Ascending)\n";
-        cout << "2. Cari Member Berdasarkan ID\n";
+        tampilkanLogoKecil();
+        cout << "====================================================\n";
+        cout << "||             >> LIHAT DATA MEMBER <<            ||\n";
+        cout << "====================================================\n";
+        cout << "1. Urutkan Nama (Selection Sort)\n";
+        cout << "2. Cari Member Berdasarkan ID (Linear Search)\n";
         cout << "0. Kembali\n";
-        cetakGaris('-', 50);
+        cout << "----------------------------------------------------\n";
+
         try
         {
-            int pilihan = inputInteger("Pilih (0-2): ");
+            int pilihan = inputInteger("Pilih menu (0-2): ");
 
             if (pilihan == 0)
             {
                 kembali = true;
                 continue;
             }
-
-            system("cls");
             Akun temp[20];
             int memberCount = 0;
             for (int i = 0; i < jumlah; i++)
@@ -309,90 +499,105 @@ void lihatMember(Akun *data, int jumlah)
             if (memberCount == 0)
                 throw runtime_error("Belum ada data member.");
 
+            system("cls");
             if (pilihan == 1)
             {
-                // Insertion Sort - Kelas Ascending
-                for (int i = 1; i < memberCount; i++)
+                for (int i = 0; i < memberCount - 1; i++)
                 {
-                    Akun key = temp[i];
-                    int j = i - 1;
-                    while (j >= 0 && temp[j].kelas.jenis > key.kelas.jenis)
-                    {
-                        temp[j + 1] = temp[j];
-                        j--;
-                    }
-                    temp[j + 1] = key;
-                }
+                    int minIndex = i;
+                    for (int j = i + 1; j < memberCount; j++)
+                        if (temp[j].nama < temp[minIndex].nama)
+                            minIndex = j;
 
-                cetakGaris('=', 64);
-                cout << "                       DAFTAR MEMBER\n";
-                cetakGaris('=', 64);
-                cout << left << setw(8) << "ID" << setw(15) << "Nama" << setw(15) << "Kelas" << "Harga" << endl;
-                cetakGaris('=', 64);
+                    if (minIndex != i)
+                        swap(temp[i], temp[minIndex]);
+                }
+                tampilkanLogoKecil();
+                cout << "\n===========================================================\n";
+                cout << "||            >> DAFTAR MEMBER (TERURUT) <<              ||\n";
+                cout << "===========================================================\n";
+                cout << left << setw(8) << "ID" << setw(20) << "Nama" << setw(20) << "Saldo" << endl;
+                cout << "-----------------------------------------------------------\n";
+
                 for (int i = 0; i < memberCount; i++)
-                    cout << left << setw(8) << temp[i].id << setw(15) << temp[i].nama
-                         << setw(15) << temp[i].kelas.jenis
-                         << formatRupiah(temp[i].kelas.harga) << "\n";
-                cetakGaris('=', 64);
-                system("pause");
+                    cout << left << setw(8) << temp[i].id
+                         << setw(20) << temp[i].nama
+                         << setw(20) << formatRupiah(temp[i].saldo) << "\n";
+
+                cout << "===========================================================\n\n";
             }
+
             else if (pilihan == 2)
             {
-                system("cls");
-                cetakHeader("CARI MEMBER BERDASARKAN ID");
-                cout << "           (Linear Search)\n";
+                tampilkanLogoKecil();
+                cout << "====================================================\n";
+                cout << "||         >> CARI MEMBER BERDASARKAN ID <<       ||\n";
+                cout << "====================================================\n";
+
                 tampilkanDaftarMember(data, jumlah);
 
-                int targetID = inputInteger("\nMasukkan ID member yang dicari: ");
-                validasiID(targetID);
-
-                // Linear Search
+                int targetID;
+                while (true)
+                {
+                    try
+                    {
+                        targetID = inputInteger("\nMasukkan ID yang dicari: ");
+                        validasiID(targetID);
+                        break;
+                    }
+                    catch (const exception &e)
+                    {
+                        cout << endl
+                             << e.what() << " Silakan coba lagi.\n";
+                    }
+                }
                 cout << "\nTarget ID: " << targetID << endl;
-                cetakGaris('-', 35);
-                int jumlahDiperiksa = 0;
-                int hasil = -1;
-                for (int i = 0; i < jumlah; i++)
+                cout << "-----------------------------------\n";
+
+                int hasil = -1, jumlahCek = 0;
+                for (int i = 0; i < jumlah && hasil == -1; i++)
                 {
                     if (data[i].role == "member")
                     {
-                        jumlahDiperiksa++;
-                        cout << "Cek member ke-" << jumlahDiperiksa << ": ID " << data[i].id;
+                        jumlahCek++;
+                        cout << "Cek member ke-" << jumlahCek << ": ID " << data[i].id;
+
                         if (data[i].id == targetID)
                         {
-                            cout << " ==> COCOK!" << endl;
+                            cout << " >>> COCOK!\n";
                             hasil = i;
-                            break;
                         }
                         else
-                            cout << " (tidak cocok)" << endl;
+                            cout << " (tidak cocok)\n";
                     }
                 }
-                cetakGaris('-', 35);
+                cout << "-----------------------------------\n";
 
                 if (hasil != -1)
                 {
-                    cout << "Ditemukan setelah " << jumlahDiperiksa << " pengecekan!\n";
-                    cetakGaris('=', 64);
-                    cout << "                   MEMBER DITEMUKAN!\n";
-                    cetakGaris('=', 64);
-                    cout << left << setw(15) << "ID" << ": " << data[hasil].id << endl;
-                    cout << left << setw(15) << "Nama" << ": " << data[hasil].nama << endl;
-                    cout << left << setw(15) << "Kelas" << ": " << data[hasil].kelas.jenis << endl;
-                    cout << left << setw(15) << "Harga" << ": " << formatRupiah(data[hasil].kelas.harga) << endl;
-                    cetakGaris('=', 64);
+                    cout << "Ditemukan setelah " << jumlahCek << " pengecekan!\n\n";
+                    cout << "====================================================\n";
+                    cout << "||             >> MEMBER DITEMUKAN! <<            ||\n";
+                    cout << "====================================================\n";
+                    cout << "ID       : " << data[hasil].id << endl;
+                    cout << "Nama     : " << data[hasil].nama << endl;
+                    cout << "Saldo    : " << formatRupiah(data[hasil].saldo) << endl;
+                    cout << "====================================================\n";
                 }
                 else
                     cout << "Member dengan ID " << targetID << " tidak ditemukan!\n";
 
-                system("pause");
+                cout << "\n";
             }
             else
                 throw out_of_range("Pilihan tidak valid!");
+
+            system("pause");
         }
         catch (const exception &e)
         {
-            cout << "\n"
-                 << e.what() << "\n";
+            cout << endl
+                 << e.what() << "\n\n";
             system("pause");
         }
     }
@@ -400,7 +605,13 @@ void lihatMember(Akun *data, int jumlah)
 
 void hapusMember(Akun *data, int &jumlah)
 {
+    system("cls");
+    tampilkanLogoKecil();
+    cout << "====================================================\n";
+    cout << "||               >> HAPUS MEMBER <<               ||\n";
+    cout << "====================================================\n";
     tampilkanDaftarMember(data, jumlah);
+
     try
     {
         int IDHapus = inputInteger("\nMasukkan ID member yang ingin dihapus: ");
@@ -409,148 +620,305 @@ void hapusMember(Akun *data, int &jumlah)
         int index = cariID(data, jumlah, IDHapus);
         if (index == -1)
             throw runtime_error("Member dengan ID tersebut tidak ditemukan!");
+        cout << "\nMenghapus member: " << data[index].nama << "\n";
 
         for (int j = index; j < jumlah - 1; j++)
             data[j] = data[j + 1];
         jumlah--;
-        cout << "\nData member berhasil dihapus!\n";
+
+        loadingAnimation();
+        cout << "Data member berhasil dihapus!\n\n";
     }
     catch (const exception &e)
     {
-        cout << "\n"
-             << e.what() << "\n";
+        cout << endl
+             << e.what() << "\n\n";
     }
 }
 
 void tambahJadwal(JadwalKelas *dataJadwal, int &jumlahJadwal, int maxJadwal)
 {
     system("cls");
-    cetakHeader("TAMBAH JADWAL KELAS");
+    tampilkanLogoKecil();
+    cout << "====================================================\n";
+    cout << "||            >> TAMBAH JADWAL KELAS <<           ||\n";
+    cout << "====================================================\n";
 
-    if (jumlahJadwal < maxJadwal) {
-        dataJadwal[jumlahJadwal].jadwalID = jumlahJadwal + 1;
-        
-        cin.ignore();
-        cout << "Nama Kelas       : "; getline(cin, dataJadwal[jumlahJadwal].namaKelas);
-        cout << "Jenis Kelas      : "; getline(cin, dataJadwal[jumlahJadwal].jenisKelas);
-        cout << "Hari             : "; getline(cin, dataJadwal[jumlahJadwal].hari);
-        cout << "Waktu (HH:MM)    : "; getline(cin, dataJadwal[jumlahJadwal].waktu);
-        cout << "Instruktur       : "; getline(cin, dataJadwal[jumlahJadwal].instruktur);
-        
-        // Menggunakan inputInteger jika kamu punya fungsinya, jika tidak gunakan cin >>
-        cout << "Kapasitas Peserta: "; 
-        cin >> dataJadwal[jumlahJadwal].kapasitas;
-        
-        dataJadwal[jumlahJadwal].terisi = 0; // Default kosong
+    if (jumlahJadwal >= maxJadwal)
+    {
+        cout << "Kuota penyimpanan jadwal penuh!\n\n";
+        return;
+    }
 
+    try
+    {
+        cin.ignore(1000, '\n');
+
+        string hariInput;
+        cout << "\nHari (Senin/Selasa/Rabu/Kamis/Jumat/Sabtu/Minggu): ";
+        getline(cin, hariInput);
+        validasiHari(hariInput);
+
+        string jamInput;
+        cout << "Jam (contoh: 08:00 - 09:00): ";
+        getline(cin, jamInput);
+        validasiJam(jamInput);
+
+        string jenisInput;
+        cout << "Jenis Kelas (contoh: Mat Pilates, Reformer, dll): ";
+        getline(cin, jenisInput);
+        validasiTeksHuruf(jenisInput, "Jenis kelas");
+
+        string kategoriInput;
+        cout << "Kategori (Private/Reguler): ";
+        getline(cin, kategoriInput);
+        validasiTeksHuruf(kategoriInput, "Kategori");
+
+        string instrukturInput;
+        cout << "Instruktur: ";
+        getline(cin, instrukturInput);
+        validasiTeksHuruf(instrukturInput, "Instruktur");
+
+        int hargaInput;
+        bool validHarga = false;
+        while (!validHarga)
+        {
+            try
+            {
+                cout << "Harga Kelas: Rp ";
+                cin >> hargaInput;
+                if (cin.fail())
+                {
+                    cin.clear();
+                    cin.ignore(1000, '\n');
+                    throw invalid_argument("Input harga tidak valid!");
+                }
+                if (hargaInput <= 0)
+                    throw invalid_argument("Harga harus lebih dari 0!");
+                validHarga = true;
+            }
+            catch (const exception &e)
+            {
+                cout << endl
+                     << e.what() << " Silakan coba lagi.\n";
+            }
+        }
+
+        int kapasitasInput = inputInteger("Kapasitas Peserta: ");
+        if (kapasitasInput <= 0)
+            throw invalid_argument("Kapasitas harus lebih dari 0!");
+
+        int newID = 1;
+        for (int i = 0; i < jumlahJadwal; i++)
+            if (dataJadwal[i].jadwalID >= newID)
+                newID = dataJadwal[i].jadwalID + 1;
+
+        dataJadwal[jumlahJadwal].jadwalID = newID;
+        dataJadwal[jumlahJadwal].hari = hariInput;
+        dataJadwal[jumlahJadwal].jam = jamInput;
+        dataJadwal[jumlahJadwal].jenisKelas = jenisInput;
+        dataJadwal[jumlahJadwal].kategori = kategoriInput;
+        dataJadwal[jumlahJadwal].instruktur = instrukturInput;
+        dataJadwal[jumlahJadwal].harga = hargaInput;
+        dataJadwal[jumlahJadwal].kapasitas = kapasitasInput;
+        dataJadwal[jumlahJadwal].terisi = 0;
         jumlahJadwal++;
-        cout << "\n[Sukses] Jadwal Berhasil Ditambahkan!";
-    } else {
-        cout << "\n[Gagal] Kuota penyimpanan jadwal penuh!";
+
+        loadingAnimation();
+        cout << "Jadwal berhasil ditambahkan!\n";
+        cout << "ID Jadwal: " << newID << "\n\n";
+    }
+    catch (const exception &e)
+    {
+        cout << endl
+             << e.what() << "\n\n";
     }
 }
 
 void lihatJadwal(JadwalKelas *dataJadwal, int jumlahJadwal)
 {
     system("cls");
-    cetakHeader("DAFTAR JADWAL KELAS");
+    tampilkanLogoKecil();
+    cout << "====================================================\n";
+    cout << "||            >> LIHAT JADWAL KELAS <<            ||\n";
+    cout << "====================================================\n";
 
-    if (jumlahJadwal == 0) {
-        cout << "Data jadwal masih kosong.\n";
-    } else {
-        cout << "ID | Nama Kelas | Jenis | Hari | Waktu | Instruktur | Sisa Kuota\n";
-        cetakGaris('-', 80);
-        for (int i = 0; i < jumlahJadwal; i++) {
-            int sisa = dataJadwal[i].kapasitas - dataJadwal[i].terisi;
-            cout << dataJadwal[i].jadwalID << " | "
-                 << dataJadwal[i].namaKelas << " | "
-                 << dataJadwal[i].jenisKelas << " | "
-                 << dataJadwal[i].hari << " | "
-                 << dataJadwal[i].waktu << " | "
-                 << dataJadwal[i].instruktur << " | "
-                 << sisa << "/" << dataJadwal[i].kapasitas << endl;
-        }
-    }
+    tampilkanDaftarJadwal(dataJadwal, jumlahJadwal);
 }
 
 void updateJadwal(JadwalKelas *dataJadwal, int jumlahJadwal)
 {
     system("cls");
-    cetakHeader("UPDATE JADWAL KELAS");
+    tampilkanLogoKecil();
+    cout << "====================================================\n";
+    cout << "||            >> UPDATE JADWAL KELAS <<           ||\n";
+    cout << "====================================================\n";
 
-    if (jumlahJadwal == 0) {
-        cout << "Data kosong!\n";
+    if (jumlahJadwal == 0)
+    {
+        cout << "Data jadwal masih kosong!\n\n";
         return;
     }
+
+    tampilkanDaftarJadwal(dataJadwal, jumlahJadwal);
+    cout << "\n";
 
     int idCari = inputInteger("Masukkan ID Jadwal yang ingin diubah: ");
     bool ditemukan = false;
 
-    for (int i = 0; i < jumlahJadwal; i++) {
-        if (dataJadwal[i].jadwalID == idCari) {
+    for (int i = 0; i < jumlahJadwal; i++)
+    {
+        if (dataJadwal[i].jadwalID == idCari)
+        {
             ditemukan = true;
-            cout << "--- Data Baru ---\n";
-            cin.ignore();
-            cout << "Nama Kelas : "; getline(cin, dataJadwal[i].namaKelas);
-            cout << "Hari       : "; getline(cin, dataJadwal[i].hari);
-            cout << "Waktu      : "; getline(cin, dataJadwal[i].waktu);
-            cout << "Instruktur : "; getline(cin, dataJadwal[i].instruktur);
-            cout << "Kapasitas  : "; cin >> dataJadwal[i].kapasitas;
-            
-            cout << "\n[Sukses] Data Berhasil Diperbarui!";
+            cout << "\n    --- MASUKKAN DATA BARU ---\n";
+            cin.ignore(1000, '\n');
+            string inputBaru;
+
+            cout << "Hari (sekarang: " << dataJadwal[i].hari << "): ";
+            getline(cin, inputBaru);
+            if (!inputBaru.empty())
+            {
+                validasiHari(inputBaru);
+                dataJadwal[i].hari = inputBaru;
+            }
+
+            cout << "Jam (sekarang: " << dataJadwal[i].jam << "): ";
+            getline(cin, inputBaru);
+            if (!inputBaru.empty())
+            {
+                validasiJam(inputBaru);
+                dataJadwal[i].jam = inputBaru;
+            }
+
+            cout << "Jenis Kelas (sekarang: " << dataJadwal[i].jenisKelas << "): ";
+            getline(cin, inputBaru);
+            if (!inputBaru.empty())
+            {
+                validasiTeksHuruf(inputBaru, "Jenis kelas");
+                dataJadwal[i].jenisKelas = inputBaru;
+            }
+
+            cout << "Kategori (sekarang: " << dataJadwal[i].kategori << "): ";
+            getline(cin, inputBaru);
+            if (!inputBaru.empty())
+            {
+                validasiTeksHuruf(inputBaru, "Kategori");
+                dataJadwal[i].kategori = inputBaru;
+            }
+
+            cout << "Instruktur (sekarang: " << dataJadwal[i].instruktur << "): ";
+            getline(cin, inputBaru);
+            if (!inputBaru.empty())
+            {
+                validasiTeksHuruf(inputBaru, "Instruktur");
+                dataJadwal[i].instruktur = inputBaru;
+            }
+
+            cout << "Harga (sekarang: " << formatRupiah(dataJadwal[i].harga) << "): Rp ";
+            string hargaStr;
+            getline(cin, hargaStr);
+            if (!hargaStr.empty())
+            {
+                int hargaBaru = stoi(hargaStr);
+                if (hargaBaru > 0)
+                    dataJadwal[i].harga = hargaBaru;
+            }
+
+            cout << "Kapasitas (sekarang: " << dataJadwal[i].kapasitas << "): ";
+            string kapasitasStr;
+            getline(cin, kapasitasStr);
+            if (!kapasitasStr.empty())
+            {
+                int kapasitasBaru = stoi(kapasitasStr);
+                if (kapasitasBaru > 0)
+                    dataJadwal[i].kapasitas = kapasitasBaru;
+            }
+
+            loadingAnimation();
+            cout << "Data Jadwal Berhasil Diperbarui!\n\n";
             break;
         }
     }
 
-    if (!ditemukan) cout << "\n[Gagal] ID Jadwal tidak ditemukan.";
+    if (!ditemukan)
+    {
+        cout << "\nID Jadwal tidak ditemukan.\n\n";
+    }
 }
 
 void hapusJadwal(JadwalKelas *dataJadwal, int &jumlahJadwal)
 {
     system("cls");
-    cetakHeader("HAPUS JADWAL KELAS");
+    tampilkanLogoKecil();
+    cout << "====================================================\n";
+    cout << "||            >> HAPUS JADWAL KELAS <<            ||\n";
+    cout << "====================================================\n";
 
-    if (jumlahJadwal == 0) {
-        cout << "Data kosong!\n";
+    if (jumlahJadwal == 0)
+    {
+        cout << "Data jadwal masih kosong!\n\n";
         return;
     }
+
+    tampilkanDaftarJadwal(dataJadwal, jumlahJadwal);
+    cout << "\n";
 
     int idCari = inputInteger("Masukkan ID Jadwal yang ingin dihapus: ");
     int indexKetemu = -1;
 
-    for (int i = 0; i < jumlahJadwal; i++) {
-        if (dataJadwal[i].jadwalID == idCari) {
+    for (int i = 0; i < jumlahJadwal; i++)
+    {
+        if (dataJadwal[i].jadwalID == idCari)
+        {
             indexKetemu = i;
             break;
         }
     }
 
-    if (indexKetemu != -1) {
-        for (int i = indexKetemu; i < jumlahJadwal - 1; i++) {
+    if (indexKetemu != -1)
+    {
+        cout << "\nMenghapus jadwal: " << dataJadwal[indexKetemu].jenisKelas
+             << " (" << dataJadwal[indexKetemu].kategori << ")"
+             << " - " << dataJadwal[indexKetemu].hari
+             << " " << dataJadwal[indexKetemu].jam << "\n";
+
+        for (int i = indexKetemu; i < jumlahJadwal - 1; i++)
             dataJadwal[i] = dataJadwal[i + 1];
-        }
         jumlahJadwal--;
-        cout << "\n[Sukses] Jadwal Berhasil Dihapus!";
-    } else {
-        cout << "\n[Gagal] ID tidak ditemukan.";
+
+        loadingAnimation();
+        cout << "Jadwal Berhasil Dihapus!\n\n";
+    }
+    else
+    {
+        cout << "\nID tidak ditemukan.\n\n";
     }
 }
 
 void approvalBooking(Booking *dataBooking, int jumlahBooking, Akun *dataAkun, int jumlahAkun)
 {
     system("cls");
-    cetakHeader("APPROVAL BOOKING");
+    tampilkanLogoKecil();
+    cout << "====================================================\n";
+    cout << "||              >> APPROVAL BOOKING <<            ||\n";
+    cout << "====================================================\n";
 
     if (jumlahBooking == 0)
     {
-        cout << "Belum ada data booking.\n";
+        cout << "Belum ada data booking.\n\n";
         return;
     }
-    cetakGaris('=', 80);
-    cout << left << setw(10) << "Booking ID" << setw(15) << "Nama Member"
-         << setw(12) << "Member ID" << setw(15) << "Kelas"
-         << setw(15) << "Harga" << "Status" << endl;
-    cetakGaris('=', 80);
+
+    cout << "\n";
+    cout << "================================================================================\n";
+    cout << left << setw(10) << "BookingID"
+         << setw(18) << "Nama Member"
+         << setw(10) << "MemberID"
+         << setw(12) << "Kelas"
+         << setw(18) << "Harga"
+         << "Status" << endl;
+    cout << "--------------------------------------------------------------------------------\n";
 
     bool adaPending = false;
     for (int i = 0; i < jumlahBooking; i++)
@@ -558,26 +926,26 @@ void approvalBooking(Booking *dataBooking, int jumlahBooking, Akun *dataAkun, in
         if (dataBooking[i].status == "pending")
         {
             adaPending = true;
-            cout << left << setw(10) << dataBooking[i].bookingID
-                 << setw(15) << dataBooking[i].namaMember
-                 << setw(12) << dataBooking[i].memberID
-                 << setw(15) << dataBooking[i].jenisKelas
-                 << setw(15) << formatRupiah(dataBooking[i].harga)
-                 << dataBooking[i].status << endl;
+            cout << "    " << left << setw(10) << dataBooking[i].bookingID
+                 << setw(18) << dataBooking[i].namaMember
+                 << setw(10) << dataBooking[i].memberID
+                 << setw(12) << dataBooking[i].jenisKelas
+                 << setw(18) << formatRupiah(dataBooking[i].harga)
+                 << dataBooking[i].status << "\n";
         }
     }
 
     if (!adaPending)
     {
-        cout << "       [ Tidak ada booking yang menunggu approval ]\n";
-        cetakGaris('=', 80);
+        cout << "Tidak ada booking yang menunggu approval\n";
+        cout << "================================================================================\n";
         return;
     }
-    cetakGaris('=', 80);
+    cout << "================================================================================\n";
 
     try
     {
-        int bookingID = inputInteger("\nMasukkan Booking ID yang ingin di-approve/reject: ");
+        int bookingID = inputInteger("\nMasukkan Booking ID yang ingin diproses: ");
 
         int index = -1;
         for (int i = 0; i < jumlahBooking; i++)
@@ -592,21 +960,23 @@ void approvalBooking(Booking *dataBooking, int jumlahBooking, Akun *dataAkun, in
         if (index == -1)
             throw runtime_error("Booking ID tidak ditemukan atau sudah diproses!");
 
-        cout << "\nDetail Booking:\n";
-        cout << "Booking ID  : " << dataBooking[index].bookingID << endl;
-        cout << "Nama Member : " << dataBooking[index].namaMember << endl;
-        cout << "Kelas       : " << dataBooking[index].jenisKelas << endl;
-        cout << "Harga       : " << formatRupiah(dataBooking[index].harga) << endl;
-        cetakGaris('-', 50);
+        cout << "\n    --- Detail Booking ---\n";
+        cout << "----------------------------------------\n";
+        cout << left << setw(15) << "Booking ID" << ": " << dataBooking[index].bookingID << "\n";
+        cout << left << setw(15) << "Nama Member" << ": " << dataBooking[index].namaMember << "\n";
+        cout << left << setw(15) << "Kelas" << ": " << dataBooking[index].jenisKelas << "\n";
+        cout << left << setw(15) << "Harga" << ": " << formatRupiah(dataBooking[index].harga) << "\n";
+        cout << "----------------------------------------\n";
         cout << "1. Approve\n";
         cout << "2. Reject\n";
 
-        int pilihan = inputInteger("Pilihan (1/2): ");
+        int pilihan = inputInteger("\nPilihan (1/2): ");
 
         if (pilihan == 1)
         {
             dataBooking[index].status = "approved";
-            cout << "\nBooking berhasil di-approve!\n";
+            loadingAnimation();
+            cout << "Booking berhasil di-approve!\n\n";
         }
         else if (pilihan == 2)
         {
@@ -616,60 +986,134 @@ void approvalBooking(Booking *dataBooking, int jumlahBooking, Akun *dataAkun, in
             if (indexMember != -1)
             {
                 dataAkun[indexMember].saldo += dataBooking[index].harga;
-                cout << "\nBooking di-reject! Saldo member dikembalikan.\n";
             }
+            loadingAnimation();
+            cout << "Booking di-reject! Saldo member dikembalikan.\n\n";
         }
         else
             throw out_of_range("Pilihan tidak valid!");
     }
     catch (const exception &e)
     {
-        cout << "\n"
-             << e.what() << "\n";
+        cout << endl
+             << e.what() << "\n\n";
     }
 }
 
 void ProfilSaya(Akun *data, int jumlah, string namaLogin)
 {
     system("cls");
-    cout << "Selamat Datang, " ;
-    string pilihan;
-    cin >> pilihan;
-    cetakHeader("PROFIL SAYA");
+    tampilkanLogoKecil();
+    cout << "====================================================\n";
+    cout << "||                >> PROFIL SAYA <<               ||\n";
+    cout << "====================================================\n";
+    try
+    {
+        int index = cariusername(data, jumlah, namaLogin);
+        if (index == -1)
+            throw runtime_error("Profil tidak ditemukan.");
+
+        cout << "\n";
+        cout << left << setw(12) << "ID" << ": " << data[index].id << "\n";
+        cout << left << setw(12) << "Nama" << ": " << data[index].nama << "\n";
+        cout << left << setw(12) << "Password" << ": " << data[index].pw << "\n";
+        cout << left << setw(12) << "Saldo" << ": " << formatRupiah(data[index].saldo) << "\n";
+        cout << "====================================================\n";
+
+        cout << "\nIngin mengubah password ?\n";
+        cout << "1. Ya, ganti password\n";
+        cout << "0. Tidak, kembali\n";
+
+        int pilihan;
+        bool validInput = false;
+        while (!validInput)
+        {
+            try
+            {
+                pilihan = inputInteger("Pilihan (1/0): ");
+                if (pilihan != 1 && pilihan != 0)
+                    throw out_of_range("Pilihan harus 1 atau 0!");
+                validInput = true;
+            }
+            catch (const exception &e)
+            {
+                cout << "[X] " << e.what() << " Silakan coba lagi.\n";
+            }
+        }
+
+        if (pilihan == 1)
+        {
+            string pwBaru;
+            cin.ignore(1000, '\n');
+            cout << "Masukkan password baru: ";
+            cin >> pwBaru;
+            validasiPassword(pwBaru);
+            data[index].pw = pwBaru;
+            loadingAnimation();
+            cout << "Password berhasil diubah!\n\n";
+        }
+        else if (pilihan == 0)
+        {
+            cout << "\nKembali ke menu member...\n\n";
+        }
+    }
+    catch (const exception &e)
+    {
+        cout << "\n[X] " << e.what() << "\n\n";
+    }
 }
 
-void topUpSaldo(Akun *data, int jumlah, string namaLogin)
+void topUpSaldo(Akun *data, int jumlah, string namaLogin, TopUp *dataTopUp, int &jumlahTopUp, int maxTopUp)
 {
     system("cls");
-    cetakHeader("TOP UP SALDO");
+    tampilkanLogoKecil();
+    cout << "====================================================\n";
+    cout << "||                 >> TOP UP SALDO <<             ||\n";
+    cout << "====================================================\n";
+
     try
     {
         int index = cariusername(data, jumlah, namaLogin);
         if (index == -1)
             throw runtime_error("Akun tidak ditemukan!");
+        cout << "Saldo saat ini: ";
+        cout << formatRupiah(data[index].saldo) << endl;
+        cout << "----------------------------------------------------\n";
 
-        cout << "Saldo saat ini: " << formatRupiah(data[index].saldo) << endl;
-        cetakGaris('-', 50);
-
-        int nominal = inputInteger("Masukkan nominal top up: Rp ");
+        int nominal = inputInteger("Nominal top up: Rp ");
         if (nominal <= 0)
             throw invalid_argument("Nominal harus lebih dari 0!");
 
         data[index].saldo += nominal;
-        cout << "\nTop up berhasil!" << endl;
-        cout << "Saldo baru: " << formatRupiah(data[index].saldo) << endl;
+
+        if (jumlahTopUp < maxTopUp)
+        {
+            dataTopUp[jumlahTopUp].namaMember = namaLogin;
+            dataTopUp[jumlahTopUp].nominal = nominal;
+            jumlahTopUp++;
+        }
+
+        loadingAnimation();
+        cout << "Top up berhasil!\n";
+        cout << "Saldo baru: ";
+        cout << formatRupiah(data[index].saldo) << endl
+             << endl;
     }
     catch (const exception &e)
     {
-        cout << "\n"
-             << e.what() << "\n";
+        cout << endl
+             << e.what() << "\n\n";
     }
 }
 
-void bookingKelas(Akun *data, int jumlahAkun, string namaLogin, Booking *dataBooking, int &jumlahBooking, int maxBooking)
+void bookingKelas(Akun *data, int jumlahAkun, string namaLogin, Booking *dataBooking, int &jumlahBooking, int maxBooking, JadwalKelas *dataJadwal, int jumlahJadwal)
 {
     system("cls");
-    cetakHeader("BOOKING KELAS");
+    tampilkanLogoKecil();
+    cout << "====================================================\n";
+    cout << "||               >> BOOKING KELAS <<              ||\n";
+    cout << "====================================================\n";
+
     try
     {
         validasiKapasitas(jumlahBooking, maxBooking);
@@ -678,66 +1122,194 @@ void bookingKelas(Akun *data, int jumlahAkun, string namaLogin, Booking *dataBoo
         if (indexMember == -1)
             throw runtime_error("Akun tidak ditemukan!");
 
-        cout << "Saldo Anda: " << formatRupiah(data[indexMember].saldo) << endl;
-        cetakGaris('-', 50);
-        cout << "Pilihan Kelas:\n";
-        cout << "1. Private  - " << formatRupiah(1000000) << endl;
-        cout << "2. Reguler  - " << formatRupiah(450000) << endl;
-        cetakGaris('-', 50);
-
-        int pilihan = inputInteger("Pilih kelas (1/2): ");
-        string jenisKelas;
-        int harga;
-
-        if (pilihan == 1)
-        {   
-            jenisKelas = "private";
-            harga = 1000000;
-        }
-        else if (pilihan == 2)
+        if (jumlahJadwal == 0)
         {
-            jenisKelas = "reguler";
-            harga = 450000;
+            cout << "Belum ada jadwal kelas tersedia.\n\n";
+            return;
         }
-        else
-            throw out_of_range("Pilihan tidak valid!");
+
+        cout << "Saldo Anda: ";
+        cout << formatRupiah(data[indexMember].saldo) << endl;
+        cout << "----------------------------------------------------\n";
+        tampilkanDaftarJadwal(dataJadwal, jumlahJadwal);
+
+        int jadwalID = inputInteger("\nMasukkan ID Jadwal yang ingin dibooking: ");
+        int indexJadwal = -1;
+        for (int i = 0; i < jumlahJadwal; i++)
+        {
+            if (dataJadwal[i].jadwalID == jadwalID)
+            {
+                indexJadwal = i;
+                break;
+            }
+        }
+
+        if (indexJadwal == -1)
+            throw runtime_error("ID Jadwal tidak ditemukan!");
+
+        if (dataJadwal[indexJadwal].terisi >= dataJadwal[indexJadwal].kapasitas)
+            throw runtime_error("Kelas sudah penuh!");
+
+        int harga = dataJadwal[indexJadwal].harga;
 
         if (data[indexMember].saldo < harga)
             throw runtime_error("Saldo tidak cukup! Silakan top up terlebih dahulu.");
+
         int newBookingID = 1;
         for (int i = 0; i < jumlahBooking; i++)
             if (dataBooking[i].bookingID >= newBookingID)
                 newBookingID = dataBooking[i].bookingID + 1;
 
         data[indexMember].saldo -= harga;
-
-        dataBooking[jumlahBooking] = {
-            newBookingID,
-            namaLogin,
-            data[indexMember].id,
-            jenisKelas,
-            harga,
-            "pending"};
+        dataBooking[jumlahBooking].bookingID = newBookingID;
+        dataBooking[jumlahBooking].namaMember = namaLogin;
+        dataBooking[jumlahBooking].memberID = data[indexMember].id;
+        dataBooking[jumlahBooking].jadwalID = jadwalID;
+        dataBooking[jumlahBooking].jenisKelas = dataJadwal[indexJadwal].jenisKelas + " - " + dataJadwal[indexJadwal].kategori;
+        dataBooking[jumlahBooking].harga = harga;
+        dataBooking[jumlahBooking].status = "pending";
         jumlahBooking++;
+        dataJadwal[indexJadwal].terisi++;
 
-        cout << "\nBooking berhasil dibuat!" << endl;
-        cout << "ID Booking  : " << newBookingID << endl;
-        cout << "Kelas       : " << jenisKelas << endl;
-        cout << "Harga       : " << formatRupiah(harga) << endl;
-        cout << "Status      : Menunggu Approval Admin" << endl;
-        cout << "Saldo tersisa: " << formatRupiah(data[indexMember].saldo) << endl;
+        loadingAnimation();
+        cout << "Booking berhasil dibuat!\n\n";
+
+        cout << "=============================================\n";
+        cout << "||           >> DETAIL BOOKING <<          ||\n";
+        cout << "=============================================\n\n";
+        cout << "ID Booking   : " << newBookingID << endl;
+        cout << "Jadwal       : " << dataJadwal[indexJadwal].hari << ", " << dataJadwal[indexJadwal].jam << endl;
+        cout << "Kelas        : " << dataJadwal[indexJadwal].jenisKelas << " (" << dataJadwal[indexJadwal].kategori << ")" << endl;
+        cout << "Instruktur   : " << dataJadwal[indexJadwal].instruktur << endl;
+        cout << "Harga        : " << formatRupiah(harga) << endl;
+        cout << "Status       : Menunggu Approval Admin" << endl;
+        cout << "Saldo Tersisa: " << formatRupiah(data[indexMember].saldo) << endl;
+        cout << "=============================================\n";
+        cout << "\n";
     }
     catch (const exception &e)
     {
-        cout << "\n"
-             << e.what() << "\n";
+        cout << endl
+             << e.what() << "\n\n";
     }
 }
 
-void riwayatTransaksi(Booking *dataBooking, int jumlahBooking, string namaLogin)
+void batalkanBooking(Booking *dataBooking, string namaLogin, int &jumlahBooking, Akun *dataAkun, int jumlahAkun)
 {
     system("cls");
-    cetakHeader("RIWAYAT TRANSAKSI");
+    tampilkanLogoKecil();
+    cout << "====================================================\n";
+    cout << "||           >> BATALKAN BOOKING KELAS <<         ||\n";
+    cout << "====================================================\n";
+    cout << left << setw(20) << "ID Booking " << setw(20) << "Kelas" << setw(15) << "Harga" << "Status" << endl;
+    cout << "----------------------------------------------------\n";
+
+    bool adaPending = false;
+    for (int i = 0; i < jumlahBooking; i++)
+    {
+        if (dataBooking[i].namaMember == namaLogin && dataBooking[i].status == "pending")
+        {
+            adaPending = true;
+            cout << left << setw(20) << dataBooking[i].bookingID
+                 << setw(20) << dataBooking[i].jenisKelas
+                 << setw(15) << formatRupiah(dataBooking[i].harga)
+                 << dataBooking[i].status << endl;
+        }
+    }
+    if (!adaPending)
+    {
+        cout << "-----------------------------------------------------------\n";
+        throw runtime_error(" Tidak ada booking pending! ");
+    }
+    cout << "====================================================\n";
+    try
+    {
+        int bookingID = inputInteger("\nMasukkan Booking ID yang ingin dibatalkan: ");
+        int index = -1;
+        for (int i = 0; i < jumlahBooking; i++)
+        {
+            if (dataBooking[i].bookingID == bookingID && dataBooking[i].namaMember == namaLogin && dataBooking[i].status == "pending")
+            {
+                index = i;
+                break;
+            }
+        }
+        if (index == -1)
+            throw runtime_error("Booking tidak ditemukan atau sudah di proses admin!");
+
+        cout << "Detail Booking!\n";
+        cout << "Booking ID  : " << dataBooking[index].bookingID << endl;
+        cout << "Kelas       : " << dataBooking[index].jenisKelas << endl;
+        cout << "Harga       : " << formatRupiah(dataBooking[index].harga) << endl;
+        cout << "Status      : " << dataBooking[index].status << endl;
+        cout << "----------------------------------------------------\n";
+
+        dataBooking[index].status = "canceled";
+        int indexMember = cariusername(dataAkun, jumlahAkun, namaLogin);
+        if (indexMember != -1)
+        {
+            dataAkun[indexMember].saldo += dataBooking[index].harga;
+            cout << "\nBooking berhasil dibatalkan! Saldo dikembalikan.\n";
+        }
+    }
+    catch (const exception &e)
+    {
+        cout << "Eror\n";
+        cout << e.what() << "\n";
+    }
+}
+
+void riwayatTransaksi(Booking *dataBooking, int jumlahBooking, TopUp *dataTopUp, int jumlahTopUp, string namaLogin)
+{
+    system("cls");
+    tampilkanLogoKecil();
+    cout << "====================================================\n";
+    cout << "||              >> RIWAYAT TRANSAKSI <<           ||\n";
+    cout << "====================================================\n";
+
+    cout << left << setw(20) << "Jenis Transaksi " << setw(20) << "Keterangan " << setw(25) << "Nominal " << setw(25) << "Status " << endl;
+    cout << "----------------------------------------------------\n";
+
+    bool AdaData = false;
+    for (int i = 0; i < jumlahTopUp; i++)
+    {
+        if (dataTopUp[i].namaMember == namaLogin)
+        {
+            AdaData = true;
+            cout << left << setw(20) << "Top Up" << setw(20) << "Saldo ditambah" << setw(25) << "+ " + formatRupiah(dataTopUp[i].nominal) << setw(25) << "Berhasil" << endl;
+        }
+    }
+    for (int i = 0; i < jumlahBooking; i++)
+    {
+        if (dataBooking[i].namaMember == namaLogin)
+        {
+            AdaData = true;
+            string keterangan = "Booking " + dataBooking[i].jenisKelas;
+
+            string nominal;
+            if (dataBooking[i].status == "approved")
+                nominal = "- " + formatRupiah(dataBooking[i].harga);
+            else if (dataBooking[i].status == "pending")
+                nominal = "- " + formatRupiah(dataBooking[i].harga);
+            else
+                nominal = "+ " + formatRupiah(dataBooking[i].harga);
+
+            string status;
+            if (dataBooking[i].status == "approved")
+                status = "Approved";
+            else if (dataBooking[i].status == "pending")
+                status = "Pending";
+            else if (dataBooking[i].status == "canceled")
+                status = "Canceled";
+            else
+                status = "Rejected";
+
+            cout << left << setw(20) << "Booking" << setw(20) << keterangan << setw(25) << nominal << setw(25) << status << endl;
+        }
+    }
+    if (!AdaData)
+        cout << "[   Belum ada riwayat transaksi.  ]\n";
+    cout << "----------------------------------------------------\n";
 }
 
 int main()
@@ -745,17 +1317,21 @@ int main()
     const int MAX = 20;
     const int MAX_BOOKING = 50;
     const int MAX_JADWAL = 30;
+    const int MAX_TOPUP = 100;
 
     Akun dataAkun[MAX];
     int jumlah = 2;
-    dataAkun[0] = {"annisa", "078", "admin", {"", 0}, 0, 0};
-    dataAkun[1] = {"juun", "0412", "member", {"reguler", 450000}, 1, 100000};
+    dataAkun[0] = {"annisa", "078", "admin", 0, 0};
+    dataAkun[1] = {"juun", "0412", "member", 1, 0};
 
     Booking dataBooking[MAX_BOOKING];
     int jumlahBooking = 0;
 
     JadwalKelas dataJadwal[MAX_JADWAL];
     int jumlahJadwal = 0;
+
+    TopUp dataTopUp[MAX_TOPUP];
+    int jumlahTopUp = 0;
 
     Akun *ptrAkun = dataAkun;
     bool programAktif = true;
@@ -768,11 +1344,38 @@ int main()
         if (!statusLogin)
         {
             system("cls");
-            cetakHeader("STUDIO PILATES MANIAK");
+            setColor(11);
+            cout << "\n";
+            cout << "================================================================\n";
+            cout << "||                                                            ||\n";
+            cout << "||     ######   ##  ##       ###   ######  #####  #####       ||\n";
+            cout << "||     ##  ##   ##  ##      ## ##    ##    ##     ##          ||\n";
+            cout << "||     #####    ##  ##      ######   ##    ####   ####        ||\n";
+            cout << "||     ##       ##  ##      ##  ##   ##    ##        ##       ||\n";
+            cout << "||     ##       ##  ### ##  ##  ##   ##    #####  ####        ||\n";
+            cout << "||                                                            ||\n";
+            cout << "||     ##   ##   ###   ##  ##   ##   ###   ##  ##             ||\n";
+            cout << "||     ### ###  ## ##  ### ##   ##  ## ##  ## ##              ||\n";
+            cout << "||     ## # ##  #####  ## ###   ##  #####  ####               ||\n";
+            cout << "||     ##   ##  ## ##  ##  ##   ##  ## ##  ## ##              ||\n";
+            cout << "||     ##   ##  ## ##  ##  ##   ##  ## ##  ##  ##             ||\n";
+            cout << "||                                                            ||\n";
+            cout << "================================================================\n";
+            setColor(14);
+            cout << "                  >> STUDIO PILATES MANAGEMENT <<\n";
+            setColor(10);
+            cout << "                    Your Health, Our Priority!\n";
+            setColor(7);
+            cout << endl;
+
+            cout << "============================================\n";
+            cout << "||            >> MENU UTAMA <<            ||\n";
+            cout << "============================================\n";
             cout << "1. Login\n";
             cout << "2. Register\n";
-            cout << "3. Keluar\n";
-            cetakGaris('-', 50);
+            cout << "0. Keluar\n";
+            cout << "--------------------------------------------\n";
+
             try
             {
                 int pilihan = inputInteger("Pilih menu (1/2/3): ");
@@ -783,18 +1386,37 @@ int main()
                     registrasi(ptrAkun, jumlah, MAX);
                     system("pause");
                 }
-                else if (pilihan == 3)
+                else if (pilihan == 0)
                 {
+                    system("cls");
+                    setColor(11);
+                    cout << "\n";
+                    cout << "    ================================================================\n";
+                    cout << "    ||                                                            ||\n";
+                    cout << "    ||         #####  #####  ####    ##   ##   ##   ###           ||\n";
+                    cout << "    ||           ##   ##     ##  ##  ##   ### ###  ## ##          ||\n";
+                    cout << "    ||           ##   ####   ####    ##   ## # ##  #####          ||\n";
+                    cout << "    ||           ##   ##     ##  ##  ##   ##   ##  ## ##          ||\n";
+                    cout << "    ||           ##   #####  ##  ##  ##   ##   ##  ## ##          ||\n";
+                    cout << "    ||                                                            ||\n";
+                    cout << "    ||             ##  ##   ###    ####   ##  ##  ##              ||\n";
+                    cout << "    ||             ## ##   ## ##  ##      ##  ##  ##              ||\n";
+                    cout << "    ||             ####    #####   ####   ##  ######              ||\n";
+                    cout << "    ||             ## ##   ## ##      ##  ##  ##  ##              ||\n";
+                    cout << "    ||             ##  ##  ## ##  ####    ##  ##  ##              ||\n";
+                    cout << "    ||                                                            ||\n";
+                    cout << "    ================================================================\n";
+                    setColor(10);
+                    cout << "                    Stay Healthy, Stay Strong!\n\n";
                     programAktif = false;
-                    cout << "Terima Kasih Telah Berkunjung!\n";
                 }
                 else
                     throw out_of_range("Pilihan tidak valid!");
             }
             catch (const exception &e)
             {
-                cout << "\n"
-                     << e.what() << "\n";
+                cout << endl
+                     << e.what() << "\n\n";
                 system("pause");
             }
         }
@@ -803,7 +1425,11 @@ int main()
             if (roleLogin == "admin")
             {
                 system("cls");
-                cetakHeader("MENU ADMIN");
+                tampilkanLogoKecil();
+
+                cout << "============================================\n";
+                cout << "||             >> MENU ADMIN <<           ||\n";
+                cout << "============================================\n";
                 cout << "1. Tambah Member (Create)\n";
                 cout << "2. Lihat Member (Read)\n";
                 cout << "3. Hapus Member (Delete)\n";
@@ -813,7 +1439,8 @@ int main()
                 cout << "7. Hapus Jadwal (Delete)\n";
                 cout << "8. Approval Booking\n";
                 cout << "0. Logout\n";
-                cetakGaris('-', 50);
+                cout << "--------------------------------------------\n";
+
                 try
                 {
                     int pilihan = inputInteger("Pilih menu (0-8): ");
@@ -826,7 +1453,6 @@ int main()
                         lihatMember(ptrAkun, jumlah);
                     else if (pilihan == 3)
                     {
-                        system("cls");
                         hapusMember(ptrAkun, jumlah);
                         system("pause");
                     }
@@ -860,7 +1486,8 @@ int main()
                         statusLogin = false;
                         namaLogin = "";
                         roleLogin = "";
-                        cout << "Berhasil Logout!\n";
+                        loadingAnimation();
+                        cout << "Berhasil Logout!\n\n";
                         system("pause");
                     }
                     else
@@ -868,21 +1495,27 @@ int main()
                 }
                 catch (const exception &e)
                 {
-                    cout << "\n"
-                         << e.what() << "\n";
+                    cout << endl
+                         << e.what() << "\n\n";
                     system("pause");
                 }
             }
             else if (roleLogin == "member")
             {
                 system("cls");
-                cetakHeader("MENU MEMBER");
+                tampilkanLogoKecil();
+
+                cout << "============================================\n";
+                cout << "||          >> MENU MEMBER <<             ||\n";
+                cout << "============================================\n";
                 cout << "1. Lihat Profil Saya\n";
                 cout << "2. Top Up Saldo\n";
                 cout << "3. Booking Kelas\n";
-                cout << "4. Riwayat Transaksi\n";
+                cout << "4. Batalkan Booking Kelas\n";
+                cout << "5. Riwayat Transaksi\n";
                 cout << "0. Logout\n";
-                cetakGaris('-', 50);
+                cout << "--------------------------------------------\n";
+
                 try
                 {
                     int pilihan = inputInteger("Pilih menu: ");
@@ -893,17 +1526,22 @@ int main()
                     }
                     else if (pilihan == 2)
                     {
-                        topUpSaldo(ptrAkun, jumlah, namaLogin);
+                        topUpSaldo(ptrAkun, jumlah, namaLogin, dataTopUp, jumlahTopUp, MAX_TOPUP);
                         system("pause");
                     }
                     else if (pilihan == 3)
                     {
-                        bookingKelas(ptrAkun, jumlah, namaLogin, dataBooking, jumlahBooking, MAX_BOOKING);
+                        bookingKelas(ptrAkun, jumlah, namaLogin, dataBooking, jumlahBooking, MAX_BOOKING, dataJadwal, jumlahJadwal);
                         system("pause");
                     }
                     else if (pilihan == 4)
                     {
-                        riwayatTransaksi(dataBooking, jumlahBooking, namaLogin);
+                        batalkanBooking(dataBooking, namaLogin, jumlahBooking, ptrAkun, jumlah);
+                        system("pause");
+                    }
+                    else if (pilihan == 5)
+                    {
+                        riwayatTransaksi(dataBooking, jumlahBooking, dataTopUp, jumlahTopUp, namaLogin);
                         system("pause");
                     }
                     else if (pilihan == 0)
@@ -911,7 +1549,8 @@ int main()
                         statusLogin = false;
                         namaLogin = "";
                         roleLogin = "";
-                        cout << "Berhasil Logout!\n";
+                        loadingAnimation();
+                        cout << "Berhasil Logout!\n\n";
                         system("pause");
                     }
                     else
@@ -919,8 +1558,8 @@ int main()
                 }
                 catch (const exception &e)
                 {
-                    cout << "\n"
-                         << e.what() << "\n";
+                    cout << endl
+                         << e.what() << "\n\n";
                     system("pause");
                 }
             }
