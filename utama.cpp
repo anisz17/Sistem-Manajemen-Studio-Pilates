@@ -221,73 +221,125 @@ int cariID(Akun *data, int jumlah, int targetID)
 
 void tampilkanDaftarMember(Akun *data, int jumlah)
 {
-    cout << "\n";
-    cout << "=======================================================\n";
-    cout << "||                >> DAFTAR MEMBER TERDAFTAR <<      ||\n";
-    cout << "=======================================================\n";
 
-    cout << left << setw(8) << "ID" << setw(20) << "Nama" << setw(20) << "Saldo" << endl;
-    cout << "-------------------------------------------------------\n";
+    int wID = 2, wNama = 4, wSaldo = 5; 
+    int jmlMember = 0;
 
-    bool ada = false;
     for (int i = 0; i < jumlah; i++)
     {
         if (data[i].role == "member")
         {
-            ada = true;
-            cout << left << setw(8) << data[i].id;
-            cout << setw(20) << data[i].nama;
-            cout << setw(20) << formatRupiah(data[i].saldo) << "\n";
+            jmlMember++;
+            string idStr = to_string(data[i].id);
+            string namaStr = data[i].nama;
+            string saldoStr = formatRupiah(data[i].saldo);
+
+            if (idStr.length() > wID) wID = idStr.length();
+            if (namaStr.length() > wNama) wNama = namaStr.length();
+            if (saldoStr.length() > wSaldo) wSaldo = saldoStr.length();
         }
     }
-    if (!ada)
+    wID += 2; wNama += 2; wSaldo += 2; 
+    int totalLebar = wID + wNama + wSaldo;
+
+    cout << "\n";
+    cout << string(totalLebar, '=') << "\n";
+    cout << "||" << setw(totalLebar - 4) << setfill(' ') << left << " DAFTAR MEMBER TERDAFTAR " << "||\n";
+    cout << string(totalLebar, '=') << "\n";
+
+    cout << left << setfill(' ')
+         << setw(wID) << "ID"
+         << setw(wNama) << "Nama"
+         << setw(wSaldo) << "Saldo" << "\n";
+    cout << string(totalLebar, '-') << "\n";
+
+    if (jmlMember == 0)
     {
-        cout << "Belum ada data member terdaftar !\n";
+        cout << setw(totalLebar) << "Belum ada data member terdaftar !" << "\n";
     }
-    cout << "================================================================\n";
+    else
+    {
+        for (int i = 0; i < jumlah; i++)
+        {
+            if (data[i].role == "member")
+            {
+                cout << left
+                     << setw(wID) << data[i].id
+                     << setw(wNama) << data[i].nama
+                     << setw(wSaldo) << formatRupiah(data[i].saldo) << "\n";
+            }
+        }
+    }
+    cout << string(totalLebar, '=') << "\n";
 }
 
 void tampilkanDaftarJadwal(JadwalKelas *dataJadwal, int jumlahJadwal)
 {
-    cout << "\n";
-    cout << "================================================================================================\n";
-    cout << "||                                DAFTAR JADWAL KELAS                                         ||\n";
-    cout << "================================================================================================\n";
+    // Lebar inisialisasi dari judul kolom
+    int wID=2, wHari=4, wJam=3, wJenis=5, wKategori=8, wInstruktur=10, wHarga=5, wKapas=9;
+    
+    // Pass 1: Hitung lebar maksimal
+    for (int i = 0; i < jumlahJadwal; i++)
+    {
+        string idStr = to_string(dataJadwal[i].jadwalID);
+        string kapStr = to_string(dataJadwal[i].terisi) + "/" + 
+                        to_string(dataJadwal[i].kapasitas) + 
+                        " (sisa " + to_string(dataJadwal[i].kapasitas - dataJadwal[i].terisi) + ")";
+        
+        if (idStr.length() > wID) wID = idStr.length();
+        if (dataJadwal[i].hari.length() > wHari) wHari = dataJadwal[i].hari.length();
+        if (dataJadwal[i].jam.length() > wJam) wJam = dataJadwal[i].jam.length();
+        if (dataJadwal[i].jenisKelas.length() > wJenis) wJenis = dataJadwal[i].jenisKelas.length();
+        if (dataJadwal[i].kategori.length() > wKategori) wKategori = dataJadwal[i].kategori.length();
+        if (dataJadwal[i].instruktur.length() > wInstruktur) wInstruktur = dataJadwal[i].instruktur.length();
+        string hargaStr = formatRupiah(dataJadwal[i].harga);
+        if (hargaStr.length() > wHarga) wHarga = hargaStr.length();
+        if (kapStr.length() > wKapas) wKapas = kapStr.length();
+    }
+    
+    // Padding +2 tiap kolom
+    wID+=2; wHari+=2; wJam+=2; wJenis+=2; wKategori+=2; wInstruktur+=2; wHarga+=2; wKapas+=2;
+    int totalLebar = wID + wHari + wJam + wJenis + wKategori + wInstruktur + wHarga + wKapas;
 
-    cout << left
-         << setw(5) << "ID"
-         << setw(10) << "Hari"
-         << setw(15) << "Jam"
-         << setw(18) << "Jenis"
-         << setw(15) << "Kategori"
-         << setw(15) << "Instruktur"
-         << setw(12) << "Harga"
-         << "Kapasitas" << endl;
-    cout << "------------------------------------------------------------------------------------------------\n";
+    cout << "\n";
+    cout << string(totalLebar, '=') << "\n";
+    cout << "||" << setw(totalLebar - 4) << setfill(' ') << left << " DAFTAR JADWAL KELAS " << "||\n";
+    cout << string(totalLebar, '=') << "\n";
+
+    cout << left << setfill(' ')
+         << setw(wID) << "ID"
+         << setw(wHari) << "Hari"
+         << setw(wJam) << "Jam"
+         << setw(wJenis) << "Jenis"
+         << setw(wKategori) << "Kategori"
+         << setw(wInstruktur) << "Instruktur"
+         << setw(wHarga) << "Harga"
+         << setw(wKapas) << "Kapasitas" << "\n";
+    cout << string(totalLebar, '-') << "\n";
 
     if (jumlahJadwal == 0)
     {
-        cout << "Belum ada data jadwal !\n";
+        cout << setw(totalLebar) << "Belum ada data jadwal !" << "\n";
     }
     else
     {
         for (int i = 0; i < jumlahJadwal; i++)
         {
-            int sisa = dataJadwal[i].kapasitas - dataJadwal[i].terisi;
-
-            cout << "    " << left << setw(5) << dataJadwal[i].jadwalID;
-            cout << setw(10) << dataJadwal[i].hari;
-            cout << setw(15) << dataJadwal[i].jam;
-            cout << setw(18) << dataJadwal[i].jenisKelas;
-            cout << setw(15) << dataJadwal[i].kategori;
-            cout << setw(15) << dataJadwal[i].instruktur;
-            cout << setw(12) << formatRupiah(dataJadwal[i].harga);
-            cout << dataJadwal[i].terisi << "/" << dataJadwal[i].kapasitas
-                 << " (sisa " << sisa << ")" << endl;
+            string infoKapasitas = to_string(dataJadwal[i].terisi) + "/" + 
+                                   to_string(dataJadwal[i].kapasitas) + 
+                                   " (sisa " + to_string(dataJadwal[i].kapasitas - dataJadwal[i].terisi) + ")";
+            cout << left
+                 << setw(wID) << dataJadwal[i].jadwalID
+                 << setw(wHari) << dataJadwal[i].hari
+                 << setw(wJam) << dataJadwal[i].jam
+                 << setw(wJenis) << dataJadwal[i].jenisKelas
+                 << setw(wKategori) << dataJadwal[i].kategori
+                 << setw(wInstruktur) << dataJadwal[i].instruktur
+                 << setw(wHarga) << formatRupiah(dataJadwal[i].harga)
+                 << setw(wKapas) << infoKapasitas << "\n";
         }
     }
-
-    cout << "================================================================================================\n";
+    cout << string(totalLebar, '=') << "\n";
 }
 
 void login(Akun *data, int jumlah, bool &statusLogin, string &namaLogin, string &roleLogin)
@@ -910,38 +962,63 @@ void approvalBooking(Booking *dataBooking, int jumlahBooking, Akun *dataAkun, in
         return;
     }
 
-    cout << "\n";
-    cout << "================================================================================\n";
-    cout << left << setw(10) << "BookingID"
-         << setw(18) << "Nama Member"
-         << setw(10) << "MemberID"
-         << setw(12) << "Kelas"
-         << setw(18) << "Harga"
-         << "Status" << endl;
-    cout << "--------------------------------------------------------------------------------\n";
-
-    bool adaPending = false;
+    // HITUNG LEBAR KOLOM DINAMIS (Pass 1)
+    int wBid = 9, wNama = 11, wMid = 8, wKelas = 5, wHarga = 5, wStatus = 6;
+    bool adaPending = false;  // <-- DECLARE DI SINI SAJA (jangan duplikat!)
+    
     for (int i = 0; i < jumlahBooking; i++)
     {
         if (dataBooking[i].status == "pending")
         {
             adaPending = true;
-            cout << "    " << left << setw(10) << dataBooking[i].bookingID
-                 << setw(18) << dataBooking[i].namaMember
-                 << setw(10) << dataBooking[i].memberID
-                 << setw(12) << dataBooking[i].jenisKelas
-                 << setw(18) << formatRupiah(dataBooking[i].harga)
-                 << dataBooking[i].status << "\n";
+            string bid = to_string(dataBooking[i].bookingID);
+            string mid = to_string(dataBooking[i].memberID);
+            string harga = formatRupiah(dataBooking[i].harga);
+            
+            if (bid.length() > wBid) wBid = bid.length();
+            if (dataBooking[i].namaMember.length() > wNama) wNama = dataBooking[i].namaMember.length();
+            if (mid.length() > wMid) wMid = mid.length();
+            if (dataBooking[i].jenisKelas.length() > wKelas) wKelas = dataBooking[i].jenisKelas.length();
+            if (harga.length() > wHarga) wHarga = harga.length();
+            if (dataBooking[i].status.length() > wStatus) wStatus = dataBooking[i].status.length();
         }
     }
+    
+    wBid += 2; wNama += 2; wMid += 2; wKelas += 2; wHarga += 2; wStatus += 2;
+    int totalLebar = wBid + wNama + wMid + wKelas + wHarga + wStatus;
+
+    cout << "\n";
+    cout << string(totalLebar, '=') << "\n";
+    cout << left << setfill(' ')
+         << setw(wBid) << "BookingID"
+         << setw(wNama) << "Nama Member"
+         << setw(wMid) << "MemberID"
+         << setw(wKelas) << "Kelas"
+         << setw(wHarga) << "Harga"
+         << setw(wStatus) << "Status" << "\n";
+    cout << string(totalLebar, '-') << "\n";
 
     if (!adaPending)
     {
-        cout << "Tidak ada booking yang menunggu approval\n";
-        cout << "================================================================================\n";
+        cout << setw(totalLebar) << "Tidak ada booking yang menunggu approval" << "\n";
+        cout << string(totalLebar, '=') << "\n";
         return;
     }
-    cout << "================================================================================\n";
+
+    for (int i = 0; i < jumlahBooking; i++)
+    {
+        if (dataBooking[i].status == "pending")
+        {
+            cout << left
+                 << setw(wBid) << dataBooking[i].bookingID
+                 << setw(wNama) << dataBooking[i].namaMember
+                 << setw(wMid) << dataBooking[i].memberID
+                 << setw(wKelas) << dataBooking[i].jenisKelas
+                 << setw(wHarga) << formatRupiah(dataBooking[i].harga)
+                 << setw(wStatus) << dataBooking[i].status << "\n";
+        }
+    }
+    cout << string(totalLebar, '=') << "\n";
 
     try
     {
@@ -995,8 +1072,7 @@ void approvalBooking(Booking *dataBooking, int jumlahBooking, Akun *dataAkun, in
     }
     catch (const exception &e)
     {
-        cout << endl
-             << e.what() << "\n\n";
+        cout << endl << e.what() << "\n\n";
     }
 }
 
@@ -1198,50 +1274,92 @@ void batalkanBooking(Booking *dataBooking, string namaLogin, int &jumlahBooking,
 {
     system("cls");
     tampilkanLogoKecil();
-    cout << "====================================================\n";
-    cout << "||           >> BATALKAN BOOKING KELAS <<         ||\n";
-    cout << "====================================================\n";
-    cout << left << setw(20) << "ID Booking " << setw(20) << "Kelas" << setw(15) << "Harga" << "Status" << endl;
-    cout << "----------------------------------------------------\n";
+    cout << "========================================================================\n";
+    cout << "||                    >> BATALKAN BOOKING KELAS <<                    ||\n";
+    cout << "========================================================================\n";
 
-    bool adaPending = false;
+    int wID     = 10; 
+    int wKelas  = 5;  
+    int wHarga  = 5;  
+    int wStatus = 6;  
+    int jmlPending = 0;
+
     for (int i = 0; i < jumlahBooking; i++)
     {
         if (dataBooking[i].namaMember == namaLogin && dataBooking[i].status == "pending")
         {
-            adaPending = true;
-            cout << left << setw(20) << dataBooking[i].bookingID
-                 << setw(20) << dataBooking[i].jenisKelas
-                 << setw(15) << formatRupiah(dataBooking[i].harga)
-                 << dataBooking[i].status << endl;
+            jmlPending++;
+            
+            string idStr   = to_string(dataBooking[i].bookingID);
+            string kelasStr = dataBooking[i].jenisKelas;
+            string hargaStr = formatRupiah(dataBooking[i].harga); 
+            string statusStr = dataBooking[i].status;
+
+            if (idStr.length()   > wID)     wID     = idStr.length();
+            if (kelasStr.length() > wKelas)  wKelas  = kelasStr.length();
+            if (hargaStr.length() > wHarga)  wHarga  = hargaStr.length();
+            if (statusStr.length() > wStatus)wStatus = statusStr.length();
         }
     }
-    if (!adaPending)
+
+    wID += 2; wKelas += 2; wHarga += 2; wStatus += 2;
+    int totalLebar = wID + wKelas + wHarga + wStatus;
+
+    cout << string(totalLebar, '=') << "\n";
+    cout << left << setfill(' ')
+         << setw(wID)     << "ID Booking"
+         << setw(wKelas)  << "Kelas"
+         << setw(wHarga)  << "Harga"
+         << setw(wStatus) << "Status" << "\n";
+    cout << string(totalLebar, '-') << "\n";
+
+
+    if (jmlPending == 0)
     {
-        cout << "-----------------------------------------------------------\n";
-        throw runtime_error(" Tidak ada booking pending! ");
+        cout << " Tidak ada booking pending! \n";
+        cout << string(totalLebar, '=') << "\n";
+        cout << "\nTekan ENTER untuk kembali...";
+        cin.ignore(); cin.get();
+        return; 
     }
-    cout << "====================================================\n";
+
+    for (int i = 0; i < jumlahBooking; i++)
+    {
+        if (dataBooking[i].namaMember == namaLogin && dataBooking[i].status == "pending")
+        {
+            cout << left
+                 << setw(wID)     << dataBooking[i].bookingID
+                 << setw(wKelas)  << dataBooking[i].jenisKelas
+                 << setw(wHarga)  << formatRupiah(dataBooking[i].harga)
+                 << setw(wStatus) << dataBooking[i].status << "\n";
+        }
+    }
+    cout << string(totalLebar, '=') << "\n";
+
     try
     {
         int bookingID = inputInteger("\nMasukkan Booking ID yang ingin dibatalkan: ");
         int index = -1;
+
         for (int i = 0; i < jumlahBooking; i++)
         {
-            if (dataBooking[i].bookingID == bookingID && dataBooking[i].namaMember == namaLogin && dataBooking[i].status == "pending")
+            if (dataBooking[i].bookingID == bookingID &&
+                dataBooking[i].namaMember == namaLogin &&
+                dataBooking[i].status == "pending")
             {
                 index = i;
                 break;
             }
         }
-        if (index == -1)
-            throw runtime_error("Booking tidak ditemukan atau sudah di proses admin!");
 
-        cout << "Detail Booking!\n";
-        cout << "Booking ID  : " << dataBooking[index].bookingID << endl;
-        cout << "Kelas       : " << dataBooking[index].jenisKelas << endl;
-        cout << "Harga       : " << formatRupiah(dataBooking[index].harga) << endl;
-        cout << "Status      : " << dataBooking[index].status << endl;
+        if (index == -1)
+            throw runtime_error("Booking tidak ditemukan atau sudah diproses admin!");
+
+        cout << "\nDetail Booking!\n";
+        cout << "Booking ID  : " << dataBooking[index].bookingID << "\n";
+        cout << "Kelas       : " << dataBooking[index].jenisKelas << "\n";
+        cout << "Harga       : " << formatRupiah(dataBooking[index].harga) << "\n";
+        cout << "Status      : " << dataBooking[index].status << "\n";
         cout << "----------------------------------------------------\n";
 
         dataBooking[index].status = "canceled";
@@ -1249,13 +1367,12 @@ void batalkanBooking(Booking *dataBooking, string namaLogin, int &jumlahBooking,
         if (indexMember != -1)
         {
             dataAkun[indexMember].saldo += dataBooking[index].harga;
-            cout << "\nBooking berhasil dibatalkan! Saldo dikembalikan.\n";
+            cout << "\n[OK] Booking berhasil dibatalkan! Saldo dikembalikan.\n";
         }
     }
     catch (const exception &e)
     {
-        cout << "Eror\n";
-        cout << e.what() << "\n";
+        cout << "\n[Error] " << e.what() << "\n";
     }
 }
 
@@ -1263,53 +1380,110 @@ void riwayatTransaksi(Booking *dataBooking, int jumlahBooking, TopUp *dataTopUp,
 {
     system("cls");
     tampilkanLogoKecil();
-    cout << "====================================================\n";
-    cout << "||              >> RIWAYAT TRANSAKSI <<           ||\n";
-    cout << "====================================================\n";
-
-    cout << left << setw(20) << "Jenis Transaksi " << setw(20) << "Keterangan " << setw(25) << "Nominal " << setw(25) << "Status " << endl;
-    cout << "----------------------------------------------------\n";
-
+    
+    int wJenis=15, wKet=11, wNom=7, wStat=6;
     bool AdaData = false;
+    
     for (int i = 0; i < jumlahTopUp; i++)
     {
         if (dataTopUp[i].namaMember == namaLogin)
         {
             AdaData = true;
-            cout << left << setw(20) << "Top Up" << setw(20) << "Saldo ditambah" << setw(25) << "+ " + formatRupiah(dataTopUp[i].nominal) << setw(25) << "Berhasil" << endl;
+            string nom = "+ " + formatRupiah(dataTopUp[i].nominal);
+            if (nom.length() > wNom) wNom = nom.length();
         }
     }
+
     for (int i = 0; i < jumlahBooking; i++)
     {
         if (dataBooking[i].namaMember == namaLogin)
         {
             AdaData = true;
-            string keterangan = "Booking " + dataBooking[i].jenisKelas;
-
-            string nominal;
-            if (dataBooking[i].status == "approved")
-                nominal = "- " + formatRupiah(dataBooking[i].harga);
-            else if (dataBooking[i].status == "pending")
-                nominal = "- " + formatRupiah(dataBooking[i].harga);
+            string ket = "Booking " + dataBooking[i].jenisKelas;
+            string nom, stat;
+            if (dataBooking[i].status == "approved" || dataBooking[i].status == "pending")
+                nom = "- " + formatRupiah(dataBooking[i].harga);
             else
-                nominal = "+ " + formatRupiah(dataBooking[i].harga);
-
-            string status;
-            if (dataBooking[i].status == "approved")
-                status = "Approved";
-            else if (dataBooking[i].status == "pending")
-                status = "Pending";
-            else if (dataBooking[i].status == "canceled")
-                status = "Canceled";
-            else
-                status = "Rejected";
-
-            cout << left << setw(20) << "Booking" << setw(20) << keterangan << setw(25) << nominal << setw(25) << status << endl;
+                nom = "+ " + formatRupiah(dataBooking[i].harga);
+            
+            if (dataBooking[i].status == "approved") stat = "Approved";
+            else if (dataBooking[i].status == "pending") stat = "Pending";
+            else if (dataBooking[i].status == "canceled") stat = "Canceled";
+            else stat = "Rejected";
+            
+            if (ket.length() > wKet) wKet = ket.length();
+            if (nom.length() > wNom) wNom = nom.length();
+            if (stat.length() > wStat) wStat = stat.length();
         }
     }
+    
+    wJenis+=2; wKet+=2; wNom+=2; wStat+=2;
+    int totalLebar = wJenis + wKet + wNom + wStat;
+
+    cout << string(totalLebar, '=') << "\n";
+
+
+    string judul = " >> RIWAYAT TRANSAKSI << ";
+    int ruangTersedia = totalLebar - 4;
+    int panjangJudul = judul.length();
+    int paddingKiri = (ruangTersedia - panjangJudul) / 2;
+    int paddingKanan = ruangTersedia - panjangJudul - paddingKiri;
+
+    cout << "||" << string(paddingKiri, ' ') << judul << string(paddingKanan, ' ') << "||\n";
+
+    cout << string(totalLebar, '=') << "\n";
+
+    cout << left << setfill(' ')
+         << setw(wJenis) << "Jenis Transaksi"
+         << setw(wKet) << "Keterangan"
+         << setw(wNom) << "Nominal"
+         << setw(wStat) << "Status" << "\n";
+    cout << string(totalLebar, '-') << "\n";
+
     if (!AdaData)
-        cout << "[   Belum ada riwayat transaksi.  ]\n";
-    cout << "----------------------------------------------------\n";
+    {
+        cout << setw(totalLebar) << "Belum ada riwayat transaksi." << "\n";
+    }
+    else
+    {
+        for (int i = 0; i < jumlahTopUp; i++)
+        {
+            if (dataTopUp[i].namaMember == namaLogin)
+            {
+                string nom = "+ " + formatRupiah(dataTopUp[i].nominal);
+                cout << left
+                     << setw(wJenis) << "Top Up"
+                     << setw(wKet) << "Saldo ditambah"
+                     << setw(wNom) << nom
+                     << setw(wStat) << "Berhasil" << "\n";
+            }
+        }
+
+        for (int i = 0; i < jumlahBooking; i++)
+        {
+            if (dataBooking[i].namaMember == namaLogin)
+            {
+                string ket = "Booking " + dataBooking[i].jenisKelas;
+                string nom, stat;
+                if (dataBooking[i].status == "approved" || dataBooking[i].status == "pending")
+                    nom = "- " + formatRupiah(dataBooking[i].harga);
+                else
+                    nom = "+ " + formatRupiah(dataBooking[i].harga);
+                
+                if (dataBooking[i].status == "approved") stat = "Approved";
+                else if (dataBooking[i].status == "pending") stat = "Pending";
+                else if (dataBooking[i].status == "canceled") stat = "Canceled";
+                else stat = "Rejected";
+                
+                cout << left
+                     << setw(wJenis) << "Booking"
+                     << setw(wKet) << ket
+                     << setw(wNom) << nom
+                     << setw(wStat) << stat << "\n";
+            }
+        }
+    }
+    cout << string(totalLebar, '=') << "\n";
 }
 
 int main()
