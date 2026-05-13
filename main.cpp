@@ -27,7 +27,7 @@ int main()
     setupErrorHandling();
     SetConsoleOutputCP(65001);
 
-    const int MAX = 10;
+    const int MAX = 30;
     const int MAX_BOOKING = 50;
     const int MAX_JADWAL = 30;
     const int MAX_TOPUP = 100;
