@@ -221,6 +221,7 @@ void lihatMember(Akun *data, int jumlah, bool denganPencarian)
         else if (pilihan == 0)
         {
             cout << "🔙 Kembali ke menu utama...\n\n";
+            system("pause");
         }
         else
         {
