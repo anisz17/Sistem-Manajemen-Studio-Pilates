@@ -27,12 +27,12 @@ int main()
     setupErrorHandling();
     SetConsoleOutputCP(65001);
 
-    const int MAX = 30;
-    const int MAX_BOOKING = 50;
-    const int MAX_JADWAL = 30;
-    const int MAX_TOPUP = 100;
+    const int MAX_AKUN = 50;
+    const int MAX_JADWAL = 50;
+    const int MAX_BOOKING = 5000;
+    const int MAX_TOPUP = 5000;
 
-    Akun dataAkun[MAX];
+    Akun dataAkun[MAX_AKUN];
     int jumlah = 0;
 
     Booking dataBooking[MAX_BOOKING];
@@ -116,7 +116,7 @@ int main()
                     login(ptrAkun, jumlah, statusLogin, namaLogin, roleLogin);
                 else if (pilihan == 2)
                 {
-                    registrasi(ptrAkun, jumlah, MAX);
+                    registrasi(ptrAkun, jumlah, MAX_AKUN);
                     system("pause");
                 }
                 else if (pilihan == 0)
@@ -194,7 +194,7 @@ int main()
 
                     if (pilihan == 1)
                     {
-                        tambahMember(ptrAkun, jumlah, MAX);
+                        tambahMember(ptrAkun, jumlah, MAX_AKUN);
                         system("pause");
                     }
                     else if (pilihan == 2)
