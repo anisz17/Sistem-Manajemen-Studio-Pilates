@@ -7,29 +7,15 @@ void tambahJadwal(JadwalKelas *dataJadwal, int &jumlahJadwal, int maxJadwal)
 {
     system("cls");
     tampilkanLogoKecil();
+
     cout << "===========================================================\n";
     cout << "||               ➕ TAMBAH JADWAL KELAS ➕               ||\n";
     cout << "===========================================================\n";
-
-    if (jumlahJadwal >= maxJadwal)
-    {
-        cout << "⚠️ Kuota penyimpanan jadwal penuh!\n\n";
-        return;
-    }
-
     try
     {
-        cin.ignore(1000, '\n');
-
-        string hariInput;
-        cout << "\n📅 Hari (Senin/Selasa/Rabu/Kamis/Jumat/Sabtu/Minggu): ";
-        getline(cin, hariInput);
-        validasiHari(hariInput);
-
-        string jamInput;
-        cout << "🕐 Jam (contoh: 08:00 - 09:00): ";
-        getline(cin, jamInput);
-        validasiJam(jamInput);
+        validasiKapasitas(jumlahJadwal, maxJadwal);
+        string hariInput = pilihHari();
+        string jamInput = inputJam();
 
         string jenisInput;
         cout << "🧘 Jenis Kelas (Mat/Reformer/Cadillac/Klinis/Kontemporer): ";
@@ -46,54 +32,20 @@ void tambahJadwal(JadwalKelas *dataJadwal, int &jumlahJadwal, int maxJadwal)
         getline(cin, instrukturInput);
         validasiHurufSpasi(instrukturInput, "Instruktur");
 
-        int hargaInput;
-        bool validHarga = false;
-
-        while (!validHarga)
-        {
-            try
-            {
-                cout << "💰 Harga Kelas: Rp ";
-                cin >> hargaInput;
-
-                if (cin.fail())
-                {
-                    cin.clear();
-                    cin.ignore(1000, '\n');
-                    throw invalid_argument("❌ Input harga tidak valid!");
-                }
-
-                if (hargaInput <= 0)
-                {
-                    throw invalid_argument("❌ Harga harus lebih dari 0!");
-                }
-
-                validHarga = true;
-            }
-            catch (const exception &e)
-            {
-                cout << endl
-                     << e.what() << " Silakan coba lagi.\n";
-            }
-        }
+        int hargaInput = inputInteger("💰 Harga Kelas: Rp ");
+        if (hargaInput <= 0)
+            throw invalid_argument("❌ Harga harus lebih dari 0!");
 
         int kapasitasInput = inputInteger("👥 Kapasitas Peserta: ");
-
         if (kapasitasInput <= 0)
-        {
             throw invalid_argument("❌ Kapasitas harus lebih dari 0!");
-        }
 
         int newID = 1;
-
         for (int i = 0; i < jumlahJadwal; i++)
         {
             if (dataJadwal[i].jadwalID >= newID)
-            {
                 newID = dataJadwal[i].jadwalID + 1;
-            }
         }
-
         dataJadwal[jumlahJadwal].jadwalID = newID;
         dataJadwal[jumlahJadwal].hari = hariInput;
         dataJadwal[jumlahJadwal].jam = jamInput;
@@ -103,20 +55,16 @@ void tambahJadwal(JadwalKelas *dataJadwal, int &jumlahJadwal, int maxJadwal)
         dataJadwal[jumlahJadwal].harga = hargaInput;
         dataJadwal[jumlahJadwal].kapasitas = kapasitasInput;
         dataJadwal[jumlahJadwal].terisi = 0;
-
         jumlahJadwal++;
 
         simpanJadwal(dataJadwal, jumlahJadwal);
-
         loadingAnimation();
-
         cout << "✅ Jadwal berhasil ditambahkan!\n";
         cout << "🆔 ID Jadwal: " << newID << "\n\n";
     }
     catch (const exception &e)
     {
-        cout << endl
-             << e.what() << "\n\n";
+        cout << e.what() << "\n\n";
     }
 }
 
@@ -127,7 +75,6 @@ void lihatJadwal(JadwalKelas *dataJadwal, int jumlahJadwal)
     cout << "====================================================\n";
     cout << "||            📋 LIHAT JADWAL KELAS 📋            ||\n";
     cout << "====================================================\n";
-
     JadwalKelas temp[30];
     for (int i = 0; i < jumlahJadwal; i++)
         temp[i] = dataJadwal[i];
@@ -138,7 +85,6 @@ void lihatJadwal(JadwalKelas *dataJadwal, int jumlahJadwal)
         for (int j = i + 1; j < jumlahJadwal; j++)
             if (temp[j].kategori < temp[minIndex].kategori)
                 minIndex = j;
-
         if (minIndex != i)
             swap(temp[i], temp[minIndex]);
     }
@@ -175,7 +121,6 @@ void lihatJadwal(JadwalKelas *dataJadwal, int jumlahJadwal)
         }
 
     cout << "==========================================================================================================\n\n";
-
     cout << "🔍 Ingin mencari jadwal berdasarkan ID?\n";
     cout << "   1. ✅ Ya, cari jadwal\n";
     cout << "   0. ⬅️ Kembali\n";
@@ -192,25 +137,11 @@ void lihatJadwal(JadwalKelas *dataJadwal, int jumlahJadwal)
             cout << "====================================================\n";
             cout << "||        🔎 CARI JADWAL BERDASARKAN ID 🔎        ||\n";
             cout << "====================================================\n";
-
             tampilkanDaftarJadwal(dataJadwal, jumlahJadwal);
 
             int targetID;
-            while (true)
-            {
-                try
-                {
-                    targetID = inputInteger("\n🆔 Masukkan ID Jadwal yang dicari: ");
-                    validasiID(targetID);
-                    break;
-                }
-                catch (const exception &e)
-                {
-                    cout << endl
-                         << e.what() << " Silakan coba lagi.\n";
-                }
-            }
-
+            targetID = inputInteger("\n🆔 Masukkan ID Jadwal yang dicari: ");
+            validasiID(targetID);
             cout << "\n🎯 Target ID: " << targetID << endl;
             cout << "---------------------------------------\n";
 
@@ -247,9 +178,7 @@ void lihatJadwal(JadwalKelas *dataJadwal, int jumlahJadwal)
                 cout << "===============================================\n";
             }
             else
-                cout << "❌ Jadwal dengan ID " << targetID << " tidak ditemukan!\n";
-
-            cout << "\n";
+                cout << "❌ Jadwal dengan ID " << targetID << " tidak ditemukan!\n\n";
         }
         else if (pilihan == 0)
         {
@@ -271,6 +200,7 @@ void updateJadwal(JadwalKelas *dataJadwal, int jumlahJadwal)
 {
     system("cls");
     tampilkanLogoKecil();
+
     cout << "====================================================\n";
     cout << "||             ✏️ UPDATE JADWAL KELAS ✏️          ||\n";
     cout << "====================================================\n";
@@ -280,92 +210,84 @@ void updateJadwal(JadwalKelas *dataJadwal, int jumlahJadwal)
         cout << "❌ Data jadwal masih kosong!\n\n";
         return;
     }
-
     tampilkanDaftarJadwal(dataJadwal, jumlahJadwal);
     cout << "\n";
 
     int idCari = inputInteger("🆔 Masukkan ID Jadwal yang ingin diubah: ");
     bool ditemukan = false;
-
     for (int i = 0; i < jumlahJadwal; i++)
     {
         if (dataJadwal[i].jadwalID == idCari)
         {
             ditemukan = true;
-            cout << "===============================================\n";
+            cout << "\n===============================================\n";
             cout << "||          📝 MASUKKAN DATA BARU 📝         ||\n";
             cout << "===============================================\n";
-            cin.ignore(1000, '\n');
-            string inputBaru;
 
-            cout << "📅 Hari (sekarang: " << dataJadwal[i].hari << "): ";
-            getline(cin, inputBaru);
-            if (!inputBaru.empty())
+            if (inputYesNo("📅 Ubah Hari? (y/n): "))
             {
-                validasiHari(inputBaru);
-                dataJadwal[i].hari = inputBaru;
+                dataJadwal[i].hari = pilihHari();
             }
-
-            cout << "🕐 Jam (sekarang: " << dataJadwal[i].jam << "): ";
-            getline(cin, inputBaru);
-            if (!inputBaru.empty())
+            if (inputYesNo("🕐 Ubah Jam? (y/n): "))
             {
-                validasiJam(inputBaru);
-                dataJadwal[i].jam = inputBaru;
+                dataJadwal[i].jam = inputJam();
             }
-
-            cout << "🧘 Jenis Kelas (sekarang: " << dataJadwal[i].jenisKelas << "): ";
-            getline(cin, inputBaru);
-            if (!inputBaru.empty())
+            if (inputYesNo("🧘 Ubah Jenis Kelas? (y/n): "))
             {
-                validasiJenis(inputBaru);
-                dataJadwal[i].jenisKelas = inputBaru;
+                string jenis;
+                getline(cin, jenis);
+                validasiJenis(jenis);
+                dataJadwal[i].jenisKelas = jenis;
             }
-
-            cout << "📌 Kategori (sekarang: " << dataJadwal[i].kategori << "): ";
-            getline(cin, inputBaru);
-            if (!inputBaru.empty())
+            try
             {
-                validasiKategori(inputBaru);
-                dataJadwal[i].kategori = inputBaru;
-            }
+                if (inputYesNo("📌 Ubah Kategori? (y/n): "))
+                {
+                    string kategori;
+                    getline(cin, kategori);
+                    validasiKategori(kategori);
+                    dataJadwal[i].kategori = kategori;
+                }
 
-            cout << "👩 Instruktur (sekarang: " << dataJadwal[i].instruktur << "): ";
-            getline(cin, inputBaru);
-            if (!inputBaru.empty())
+                if (inputYesNo("👩 Ubah Instruktur? (y/n): "))
+                {
+                    string instruktur;
+                    getline(cin, instruktur);
+                    validasiHurufSpasi(instruktur, "Instruktur");
+                    dataJadwal[i].instruktur = instruktur;
+                }
+
+                if (inputYesNo("💰 Ubah Harga? (y/n): "))
+                {
+                    int hargaBaru = inputInteger("💰 Harga baru: ");
+                    if (hargaBaru > 0)
+                        dataJadwal[i].harga = hargaBaru;
+                    else
+                        cout << "❌ Harga harus lebih dari 0!\n";
+                }
+
+                if (inputYesNo("👥 Ubah Kapasitas? (y/n): "))
+                {
+                    int kapasitasBaru = inputInteger("👥 Kapasitas baru: ");
+                    if (kapasitasBaru > 0)
+                        dataJadwal[i].kapasitas = kapasitasBaru;
+                    else
+                        cout << "❌ Kapasitas harus lebih dari 0!\n";
+                }
+
+                simpanJadwal(dataJadwal, jumlahJadwal);
+                loadingAnimation();
+                cout << "✅ Data Jadwal Berhasil Diperbarui!\n\n";
+                break;
+            }
+            catch (const exception &e)
             {
-                validasiHurufSpasi(inputBaru, "Instruktur");
-                dataJadwal[i].instruktur = inputBaru;
+                cout << endl
+                     << e.what() << "\n\n";
+                break;
             }
-
-            cout << "💰 Harga (sekarang: " << formatRupiah(dataJadwal[i].harga) << "): Rp ";
-            string hargaStr;
-            getline(cin, hargaStr);
-            if (!hargaStr.empty())
-            {
-                int hargaBaru = stoi(hargaStr);
-                if (hargaBaru > 0)
-                    dataJadwal[i].harga = hargaBaru;
-            }
-
-            cout << "👥 Kapasitas (sekarang: " << dataJadwal[i].kapasitas << "): ";
-            string kapasitasStr;
-            getline(cin, kapasitasStr);
-            if (!kapasitasStr.empty())
-            {
-                int kapasitasBaru = stoi(kapasitasStr);
-                if (kapasitasBaru > 0)
-                    dataJadwal[i].kapasitas = kapasitasBaru;
-            }
-
-            simpanJadwal(dataJadwal, jumlahJadwal);
-
-            loadingAnimation();
-            cout << "✅ Data Jadwal Berhasil Diperbarui!\n\n";
-            break;
         }
     }
-
     if (!ditemukan)
     {
         cout << "\n❌ ID Jadwal tidak ditemukan.\n\n";
@@ -379,19 +301,16 @@ void hapusJadwal(JadwalKelas *dataJadwal, int &jumlahJadwal)
     cout << "====================================================\n";
     cout << "||            🗑️ HAPUS JADWAL KELAS 🗑️            ||\n";
     cout << "====================================================\n";
-
     if (jumlahJadwal == 0)
     {
         cout << "❌ Data jadwal masih kosong!\n\n";
         return;
     }
-
     tampilkanDaftarJadwal(dataJadwal, jumlahJadwal);
     cout << "\n";
 
     int idCari = inputInteger("🆔 Masukkan ID Jadwal yang ingin dihapus: ");
     int indexKetemu = -1;
-
     for (int i = 0; i < jumlahJadwal; i++)
     {
         if (dataJadwal[i].jadwalID == idCari)
@@ -407,13 +326,11 @@ void hapusJadwal(JadwalKelas *dataJadwal, int &jumlahJadwal)
              << " (" << dataJadwal[indexKetemu].kategori << ")"
              << " - " << dataJadwal[indexKetemu].hari
              << " " << dataJadwal[indexKetemu].jam << "\n";
-
         for (int i = indexKetemu; i < jumlahJadwal - 1; i++)
             dataJadwal[i] = dataJadwal[i + 1];
         jumlahJadwal--;
 
         simpanJadwal(dataJadwal, jumlahJadwal);
-
         loadingAnimation();
         cout << "✅ Jadwal Berhasil Dihapus!\n\n";
     }
@@ -430,7 +347,6 @@ void approvalBooking(Booking *dataBooking, int jumlahBooking, Akun *dataAkun, in
     cout << "====================================================\n";
     cout << "||             ✅ APPROVAL BOOKING ✅             ||\n";
     cout << "====================================================\n";
-
     if (jumlahBooking == 0)
     {
         cout << "❌ Belum ada data booking.\n\n";
@@ -461,7 +377,6 @@ void approvalBooking(Booking *dataBooking, int jumlahBooking, Akun *dataAkun, in
                  << "⏳ " << dataBooking[i].status << "\n";
         }
     }
-
     if (!adaPending)
     {
         cout << "✅ Tidak ada booking yang menunggu approval\n";
@@ -469,7 +384,6 @@ void approvalBooking(Booking *dataBooking, int jumlahBooking, Akun *dataAkun, in
         return;
     }
     cout << "=====================================================================================\n";
-
     try
     {
         int bookingID = inputInteger("\n🆔 Masukkan Booking ID yang ingin diproses: ");
@@ -486,7 +400,6 @@ void approvalBooking(Booking *dataBooking, int jumlahBooking, Akun *dataAkun, in
 
         if (index == -1)
             throw runtime_error("❌ Booking ID tidak ditemukan atau sudah diproses!");
-
         cout << "\n========================================\n";
         cout << "||         📋 DETAIL BOOKING 📋       ||\n";
         cout << "========================================\n";
@@ -497,7 +410,6 @@ void approvalBooking(Booking *dataBooking, int jumlahBooking, Akun *dataAkun, in
         cout << "----------------------------------------\n";
         cout << "1. ✅ Approve\n";
         cout << "2. ❌ Reject\n";
-
         int pilihan = inputInteger("\n🎯 Pilihan (1/2): ");
 
         if (pilihan == 1)
