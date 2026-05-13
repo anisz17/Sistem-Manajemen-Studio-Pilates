@@ -117,8 +117,8 @@ void topUpSaldo(Akun *data, int jumlah, string namaLogin, TopUp *dataTopUp, int 
         nominal = stoi(inputNominal);
         if (nominal <= 10000)
             throw invalid_argument("❌ Nominal harus lebih dari Rp 10.000!");
-        // if (nominal > 20000000)
-        //     throw invalid_argument("❌ Nominal terlalu besar!");
+        if (nominal > 10000000)
+            throw invalid_argument("❌ Nominal terlalu besar!");
 
         data[index].saldo += (int)nominal;
 
