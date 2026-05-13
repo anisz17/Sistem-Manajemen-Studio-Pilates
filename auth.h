@@ -25,6 +25,7 @@ void login(Akun *data, int jumlah, bool &statusLogin, string &namaLogin, string 
                     cout << "👤 Masukkan Username : ";
                     getline(cin, inputNama);
                     validasiHurufSpasi(inputNama, "Username", 4);
+                    trimSpasi(inputNama);
                     usernameValid = true;
                 }
                 catch (const exception &e)
