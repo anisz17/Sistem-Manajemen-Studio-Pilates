@@ -118,8 +118,6 @@ bool inputYesNo(const string &prompt)
     while (true)
     {
         cout << prompt;
-        if (cin.peek() == '\n')
-            cin.ignore(1000, '\n');
         getline(cin, input);
 
         if (input.empty())

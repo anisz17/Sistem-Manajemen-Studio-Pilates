@@ -220,7 +220,7 @@ void lihatMember(Akun *data, int jumlah, bool denganPencarian)
         }
         else if (pilihan == 0)
         {
-            return;
+            cout << "🔙 Kembali ke menu utama...\n\n";
         }
         else
         {
