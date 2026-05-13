@@ -100,7 +100,7 @@ void topUpSaldo(Akun *data, int jumlah, string namaLogin, TopUp *dataTopUp, int 
         cout << "💰 Saldo saat ini: " << formatRupiah(data[index].saldo) << endl;
         cout << "----------------------------------------------------\n";
 
-        long long nominal = 0;
+        int nominal = 0;
         string inputNominal;
 
         cout << "💵 Nominal top up: Rp ";
@@ -114,11 +114,11 @@ void topUpSaldo(Akun *data, int jumlah, string namaLogin, TopUp *dataTopUp, int 
         if (inputNominal.length() > 10)
             throw invalid_argument("❌ Nominal terlalu besar!");
 
-        nominal = stoll(inputNominal);
-        if (nominal <= 0)
-            throw invalid_argument("❌ Nominal harus lebih dari 0!");
-        if (nominal > 2147483647)
-            throw invalid_argument("❌ Nominal terlalu besar!");
+        nominal = stoi(inputNominal);
+        if (nominal <= 10000)
+            throw invalid_argument("❌ Nominal harus lebih dari Rp 10.000!");
+        // if (nominal > 20000000)
+        //     throw invalid_argument("❌ Nominal terlalu besar!");
 
         data[index].saldo += (int)nominal;
 
@@ -218,7 +218,7 @@ void bookingKelas(Akun *data, int jumlahAkun, string namaLogin, Booking *dataBoo
         cout << "🆔 ID Booking   : " << newBookingID << endl;
         cout << "📅 Jadwal       : " << dataJadwal[indexJadwal].hari << ", " << dataJadwal[indexJadwal].jam << endl;
         cout << "🧘 Kelas        : " << dataJadwal[indexJadwal].jenisKelas << " (" << dataJadwal[indexJadwal].kategori << ")" << endl;
-        cout << "👨‍🏫 Instruktur   : " << dataJadwal[indexJadwal].instruktur << endl;
+        cout << "👨‍🏫 Instruktur : " << dataJadwal[indexJadwal].instruktur << endl;
         cout << "💰 Harga        : " << formatRupiah(harga) << endl;
         cout << "⏳ Status       : Menunggu Approval Admin" << endl;
         cout << "💵 Saldo Tersisa: " << formatRupiah(data[indexMember].saldo) << endl;

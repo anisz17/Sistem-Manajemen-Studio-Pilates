@@ -19,12 +19,12 @@ void tambahJadwal(JadwalKelas *dataJadwal, int &jumlahJadwal, int maxJadwal)
         string jamInput = inputJam();
 
         string jenisInput;
-        cout << "🧘 Jenis Kelas (Mat/Reformer/Cadillac/Klinis/Kontemporer): ";
+        cout << "🧘 Jenis Kelas (mat/reformer/cadillac/klinis/kontemporer): ";
         getline(cin, jenisInput);
         validasiJenis(jenisInput);
 
         string kategoriInput;
-        cout << "📌 Kategori (Private/Reguler): ";
+        cout << "📌 Kategori (private/reguler): ";
         getline(cin, kategoriInput);
         validasiKategori(kategoriInput);
 
@@ -32,14 +32,26 @@ void tambahJadwal(JadwalKelas *dataJadwal, int &jumlahJadwal, int maxJadwal)
         cout << "👩👨 Instruktur: ";
         getline(cin, instrukturInput);
         validasiHurufSpasi(instrukturInput, "Instruktur");
+        if (instrukturInput.length() > 30)
+            throw invalid_argument("❌ Nama instruktur terlalu panjang! Maksimal 30 karakter.");
+        if (instrukturInput.length() < 3)
+            throw invalid_argument("❌ Nama instruktur terlalu pendek! Minimal 3 karakter.");
 
         int hargaInput = inputInteger("💰 Harga Kelas: Rp ");
         if (hargaInput <= 0)
             throw invalid_argument("❌ Harga harus lebih dari 0!");
+        if (kategoriInput == "private" && hargaInput < 500000)
+            throw invalid_argument("❌ Harga untuk kelas private minimal Rp 500.000!");
+        if (kategoriInput == "reguler" && hargaInput < 200000)
+            throw invalid_argument("❌ Harga untuk kelas reguler minimal Rp 200.000!");
 
         int kapasitasInput = inputInteger("👥 Kapasitas Peserta: ");
         if (kapasitasInput <= 0)
             throw invalid_argument("❌ Kapasitas harus lebih dari 0!");
+        if (kategoriInput == "private" && kapasitasInput > 5)
+            throw invalid_argument("❌ Kapasitas untuk kelas private maksimal 5!");
+        if (kategoriInput == "reguler" && kapasitasInput > 20)
+            throw invalid_argument("❌ Kapasitas untuk kelas reguler maksimal 20!");
 
         int newID = 1;
         for (int i = 0; i < jumlahJadwal; i++)
@@ -168,14 +180,14 @@ void lihatJadwal(JadwalKelas *dataJadwal, int jumlahJadwal)
                 cout << "===============================================\n";
                 cout << "||          ✅ JADWAL DITEMUKAN! ✅          ||\n";
                 cout << "===============================================\n";
-                cout << "🆔 ID         : " << dataJadwal[hasil].jadwalID << endl;
-                cout << "📅 Hari       : " << dataJadwal[hasil].hari << endl;
-                cout << "🕐 Jam        : " << dataJadwal[hasil].jam << endl;
-                cout << "🧘 Jenis      : " << dataJadwal[hasil].jenisKelas << endl;
-                cout << "📌 Kategori   : " << dataJadwal[hasil].kategori << endl;
+                cout << "🆔 ID           : " << dataJadwal[hasil].jadwalID << endl;
+                cout << "📅 Hari         : " << dataJadwal[hasil].hari << endl;
+                cout << "🕐 Jam          : " << dataJadwal[hasil].jam << endl;
+                cout << "🧘 Jenis        : " << dataJadwal[hasil].jenisKelas << endl;
+                cout << "📌 Kategori     : " << dataJadwal[hasil].kategori << endl;
                 cout << "👨‍🏫 Instruktur : " << dataJadwal[hasil].instruktur << endl;
-                cout << "💰 Harga      : " << formatRupiah(dataJadwal[hasil].harga) << endl;
-                cout << "👥 Kapasitas  : " << dataJadwal[hasil].terisi << "/" << dataJadwal[hasil].kapasitas << endl;
+                cout << "💰 Harga        : " << formatRupiah(dataJadwal[hasil].harga) << endl;
+                cout << "👥 Kapasitas    : " << dataJadwal[hasil].terisi << "/" << dataJadwal[hasil].kapasitas << endl;
                 cout << "===============================================\n";
             }
             else
@@ -264,19 +276,26 @@ void updateJadwal(JadwalKelas *dataJadwal, int jumlahJadwal)
                 if (inputYesNo("💰 Ubah Harga? (y/n): "))
                 {
                     int hargaBaru = inputInteger("💰 Harga baru: ");
-                    if (hargaBaru > 0)
-                        dataJadwal[i].harga = hargaBaru;
-                    else
-                        cout << "❌ Harga harus lebih dari 0!\n";
+                    if (hargaBaru <= 0)
+                        throw invalid_argument("❌ Harga harus lebih dari 0!\n");
+                    if (hargaBaru > 5000000)
+                        throw invalid_argument("❌ Harga terlalu besar! Maksimal Rp 5.000.000.\n");
+                    if (hargaBaru <= 100000)
+                        throw invalid_argument("❌ Harga terlalu kecil! Minimal Rp 100.000!\n");
+                    dataJadwal[i].harga = hargaBaru;
                 }
 
                 if (inputYesNo("👥 Ubah Kapasitas? (y/n): "))
                 {
+
                     int kapasitasBaru = inputInteger("👥 Kapasitas baru: ");
-                    if (kapasitasBaru > 0)
-                        dataJadwal[i].kapasitas = kapasitasBaru;
-                    else
-                        cout << "❌ Kapasitas harus lebih dari 0!\n";
+                    if (kapasitasBaru <= 0)
+                        throw invalid_argument("❌ Kapasitas harus lebih dari 0!\n");
+                    if (kapasitasBaru > 20)
+                        throw invalid_argument("❌ Kapasitas terlalu besar! Maksimal 20.\n");
+                    if (kapasitasBaru < dataJadwal[i].terisi)
+                        throw invalid_argument("❌ Kapasitas baru tidak boleh kurang dari jumlah peserta yang sudah terisi!\n");
+                    dataJadwal[i].kapasitas = kapasitasBaru;
                 }
 
                 simpanJadwal(dataJadwal, jumlahJadwal);
@@ -407,10 +426,10 @@ void approvalBooking(Booking *dataBooking, int jumlahBooking, Akun *dataAkun, in
         cout << "\n========================================\n";
         cout << "||         📋 DETAIL BOOKING 📋       ||\n";
         cout << "========================================\n";
-        cout << left << setw(15) << "🆔 Booking ID" << ": " << dataBooking[index].bookingID << "\n";
-        cout << left << setw(15) << "👤 Nama Member" << ": " << dataBooking[index].namaMember << "\n";
-        cout << left << setw(15) << "🧘 Kelas" << ": " << dataBooking[index].jenisKelas << "\n";
-        cout << left << setw(15) << "💰 Harga" << ": " << formatRupiah(dataBooking[index].harga) << "\n";
+        cout << "🆔 Booking ID" << "  : " << dataBooking[index].bookingID << "\n";
+        cout << "👤 Nama Member" << ": " << dataBooking[index].namaMember << "\n";
+        cout << "🧘 Kelas" << "       : " << dataBooking[index].jenisKelas << "\n";
+        cout << "💰 Harga" << "       : " << formatRupiah(dataBooking[index].harga) << "\n";
         cout << "----------------------------------------\n";
         cout << "1. ✅ Approve\n";
         cout << "2. ❌ Reject\n";

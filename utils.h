@@ -105,6 +105,8 @@ int inputInteger(const string &prompt)
         if (!isdigit(c))
             throw invalid_argument("❌ Input tidak valid!\n");
     }
+    if (input.length() > 10)
+        throw invalid_argument("❌ Input terlalu besar!");
     int nilai = stoi(input);
     if (nilai <= 0)
         throw invalid_argument("❌ Input tidak valid!");
