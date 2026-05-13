@@ -2,6 +2,7 @@
 #define ADMIN_JADWAL_H
 
 #include "utils.h"
+#include <limits>
 
 void tambahJadwal(JadwalKelas *dataJadwal, int &jumlahJadwal, int maxJadwal)
 {
@@ -224,26 +225,28 @@ void updateJadwal(JadwalKelas *dataJadwal, int jumlahJadwal)
             cout << "||          📝 MASUKKAN DATA BARU 📝         ||\n";
             cout << "===============================================\n";
 
-            if (inputYesNo("📅 Ubah Hari? (y/n): "))
-            {
-                dataJadwal[i].hari = pilihHari();
-            }
-            if (inputYesNo("🕐 Ubah Jam? (y/n): "))
-            {
-                dataJadwal[i].jam = inputJam();
-            }
-            if (inputYesNo("🧘 Ubah Jenis Kelas? (y/n): "))
-            {
-                string jenis;
-                getline(cin, jenis);
-                validasiJenis(jenis);
-                dataJadwal[i].jenisKelas = jenis;
-            }
             try
             {
+                if (inputYesNo("📅 Ubah Hari? (y/n): "))
+                {
+                    dataJadwal[i].hari = pilihHari();
+                }
+                if (inputYesNo("🕐 Ubah Jam? (y/n): "))
+                {
+                    dataJadwal[i].jam = inputJam();
+                }
+                if (inputYesNo("🧘 Ubah Jenis Kelas? (y/n): "))
+                {
+                    string jenis;
+                    cout << "🧘 Jenis Kelas Baru (Mat/Reformer/Cadillac/Klinis/Kontemporer): ";
+                    getline(cin, jenis);
+                    validasiJenis(jenis);
+                    dataJadwal[i].jenisKelas = jenis;
+                }
                 if (inputYesNo("📌 Ubah Kategori? (y/n): "))
                 {
                     string kategori;
+                    cout << "📌 Kategori Baru (Private/Reguler): ";
                     getline(cin, kategori);
                     validasiKategori(kategori);
                     dataJadwal[i].kategori = kategori;
@@ -252,28 +255,29 @@ void updateJadwal(JadwalKelas *dataJadwal, int jumlahJadwal)
                 if (inputYesNo("👩 Ubah Instruktur? (y/n): "))
                 {
                     string instruktur;
+                    cout << "👩👨 Instruktur Baru: ";
                     getline(cin, instruktur);
                     validasiHurufSpasi(instruktur, "Instruktur");
                     dataJadwal[i].instruktur = instruktur;
                 }
 
-                if (inputYesNo("💰 Ubah Harga? (y/n): "))
-                {
-                    int hargaBaru = inputInteger("💰 Harga baru: ");
-                    if (hargaBaru > 0)
-                        dataJadwal[i].harga = hargaBaru;
-                    else
-                        cout << "❌ Harga harus lebih dari 0!\n";
-                }
+            if (inputYesNo("💰 Ubah Harga? (y/n): "))
+            {
+                int hargaBaru = inputInteger("💰 Harga baru: ");
+                if (hargaBaru > 0)
+                    dataJadwal[i].harga = hargaBaru;
+                else
+                    cout << "❌ Harga harus lebih dari 0!\n";
+            }
 
-                if (inputYesNo("👥 Ubah Kapasitas? (y/n): "))
-                {
-                    int kapasitasBaru = inputInteger("👥 Kapasitas baru: ");
-                    if (kapasitasBaru > 0)
-                        dataJadwal[i].kapasitas = kapasitasBaru;
-                    else
-                        cout << "❌ Kapasitas harus lebih dari 0!\n";
-                }
+            if (inputYesNo("👥 Ubah Kapasitas? (y/n): "))
+            {
+                int kapasitasBaru = inputInteger("👥 Kapasitas baru: ");
+                if (kapasitasBaru > 0)
+                    dataJadwal[i].kapasitas = kapasitasBaru;
+                else
+                    cout << "❌ Kapasitas harus lebih dari 0!\n";
+            }
 
                 simpanJadwal(dataJadwal, jumlahJadwal);
                 loadingAnimation();
