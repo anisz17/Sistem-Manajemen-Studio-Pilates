@@ -152,15 +152,15 @@ void validasiID(int id)
 void validasiHurufSpasi(const string &teks, const string &namaField, int minLen = 0)
 {
     if (teks.empty())
-        throw invalid_argument("❌ input tidak boleh kosong!\n");
+        throw invalid_argument("❌ " + namaField + " tidak boleh kosong!\n");
 
     if ((int)teks.length() < minLen)
-        throw invalid_argument("❌ input minimal 4 karakter!");
+        throw invalid_argument("❌ " + namaField + " minimal " + to_string(minLen) + " karakter!");
 
     for (char c : teks)
     {
         if (!isalpha((unsigned char)c) && c != ' ')
-            throw invalid_argument("❌ input hanya boleh huruf dan spasi!");
+            throw invalid_argument("❌ " + namaField + " hanya boleh huruf dan spasi!");
     }
 }
 
