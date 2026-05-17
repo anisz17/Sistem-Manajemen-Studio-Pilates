@@ -14,7 +14,7 @@ void tambahMember(Akun *data, int &jumlah, int maxKapasitas)
     {
         validasiKapasitas(jumlah, maxKapasitas);
         string namaBaru, pwBaru;
-        bool namaValid = false;
+
         cout << "👤 Masukkan Nama Member : ";
         getline(cin, namaBaru);
         trimSpasi(namaBaru);
@@ -22,7 +22,6 @@ void tambahMember(Akun *data, int &jumlah, int maxKapasitas)
 
         if (cariusername(data, jumlah, namaBaru) != -1)
             throw invalid_argument("❌ Username sudah terdaftar.");
-
         cout << "✅ Username valid!\n\n";
 
         bool passwordValid = false;
@@ -78,7 +77,7 @@ void lihatMember(Akun *data, int jumlah)
 
     try
     {
-        Akun temp[20];
+        Akun temp[50];
         int memberCount = 0;
         for (int i = 0; i < jumlah; i++)
             if (data[i].role == "member")
@@ -126,7 +125,7 @@ void lihatMember(Akun *data, int jumlah, bool denganPencarian)
     cout << "||             👀 LIHAT DATA MEMBER 👀             ||\n";
     cout << "=====================================================\n";
 
-    Akun temp[20];
+    Akun temp[50];
     int memberCount = 0;
     for (int i = 0; i < jumlah; i++)
         if (data[i].role == "member")
@@ -157,83 +156,85 @@ void lihatMember(Akun *data, int jumlah, bool denganPencarian)
                  << setw(20) << "💰 " + formatRupiah(temp[i].saldo) << "\n";
 
     cout << "====================================================\n\n";
-
-    cout << "🔍 Ingin mencari member berdasarkan ID?\n";
-    cout << "   1. ✅ Ya, cari member\n";
-    cout << "   0. ⬅️ Kembali\n";
-    cout << "----------------------------------------------------\n";
-
-    try
+    if (denganPencarian)
     {
-        int pilihan = inputMenu(" 🎯 Pilihan (1/0): ");
+        cout << "🔍 Ingin mencari member berdasarkan ID?\n";
+        cout << "   1. ✅ Ya, cari member\n";
+        cout << "   0. ⬅️ Kembali\n";
+        cout << "----------------------------------------------------\n";
 
-        if (pilihan == 1)
+        try
         {
-            system("cls");
-            tampilkanLogoKecil();
-            cout << "====================================================\n";
-            cout << "||        🔎 CARI MEMBER BERDASARKAN ID 🔎        ||\n";
-            cout << "====================================================\n";
+            int pilihan = inputMenu(" 🎯 Pilihan (1/0): ");
 
-            tampilkanDaftarMember(data, jumlah);
-
-            int targetID;
-            targetID = inputInteger("\n🆔 Masukkan ID yang dicari: ");
-            validasiID(targetID);
-            cout << "\n🎯 Target ID: " << targetID << endl;
-            cout << "--------------------------------------------\n";
-
-            int hasil = -1, jumlahCek = 0;
-            for (int i = 0; i < jumlah && hasil == -1; i++)
+            if (pilihan == 1)
             {
-                if (data[i].role == "member")
+                system("cls");
+                tampilkanLogoKecil();
+                cout << "====================================================\n";
+                cout << "||        🔎 CARI MEMBER BERDASARKAN ID 🔎        ||\n";
+                cout << "====================================================\n";
+
+                tampilkanDaftarMember(data, jumlah);
+
+                int targetID;
+                targetID = inputInteger("\n🆔 Masukkan ID yang dicari: ");
+                validasiID(targetID);
+                cout << "\n🎯 Target ID: " << targetID << endl;
+                cout << "--------------------------------------------\n";
+
+                int hasil = -1, jumlahCek = 0;
+                for (int i = 0; i < jumlah && hasil == -1; i++)
                 {
-                    jumlahCek++;
-                    cout << "🔍 Cek member ke-" << jumlahCek << ": ID " << data[i].id;
-                    if (data[i].id == targetID)
+                    if (data[i].role == "member")
                     {
-                        cout << " >>> ✅ COCOK!\n";
-                        hasil = i;
+                        jumlahCek++;
+                        cout << "🔍 Cek member ke-" << jumlahCek << ": ID " << data[i].id;
+                        if (data[i].id == targetID)
+                        {
+                            cout << " >>> ✅ COCOK!\n";
+                            hasil = i;
+                        }
+                        else
+                            cout << " (❌ tidak cocok)\n";
                     }
-                    else
-                        cout << " (❌ tidak cocok)\n";
                 }
-            }
-            cout << "--------------------------------------------\n";
+                cout << "--------------------------------------------\n";
 
-            if (hasil != -1)
+                if (hasil != -1)
+                {
+                    cout << "🎉 Ditemukan setelah " << jumlahCek << " pengecekan!\n\n";
+                    cout << "=============================================\n";
+                    cout << "||         ✅ MEMBER DITEMUKAN! ✅         ||\n";
+                    cout << "=============================================\n";
+                    cout << "🆔 ID       : " << data[hasil].id << endl;
+                    cout << "👤 Nama     : " << data[hasil].nama << endl;
+                    cout << "💰 Saldo    : " << formatRupiah(data[hasil].saldo) << endl;
+                    cout << "=============================================\n";
+                }
+                else
+                    cout << "❌ Member dengan ID " << targetID << " tidak ditemukan!\n";
+
+                cout << "\n";
+                system("pause");
+            }
+            else if (pilihan == 0)
             {
-                cout << "🎉 Ditemukan setelah " << jumlahCek << " pengecekan!\n\n";
-                cout << "=============================================\n";
-                cout << "||         ✅ MEMBER DITEMUKAN! ✅         ||\n";
-                cout << "=============================================\n";
-                cout << "🆔 ID       : " << data[hasil].id << endl;
-                cout << "👤 Nama     : " << data[hasil].nama << endl;
-                cout << "💰 Saldo    : " << formatRupiah(data[hasil].saldo) << endl;
-                cout << "=============================================\n";
+                cout << "🔙 Kembali ke menu utama...\n\n";
+                system("pause");
             }
             else
-                cout << "❌ Member dengan ID " << targetID << " tidak ditemukan!\n";
-
-            cout << "\n";
-            system("pause");
+            {
+                cout << "\n❌ Pilihan tidak valid!\n";
+                system("pause");
+            }
         }
-        else if (pilihan == 0)
+        catch (const exception &e)
         {
-            cout << "🔙 Kembali ke menu utama...\n\n";
+            cout << endl
+                 << e.what() << "\n\n";
             system("pause");
         }
-        else
-        {
-            cout << "\n❌ Pilihan tidak valid!\n";
-            system("pause");
-        }
-    }
-    catch (const exception &e)
-    {
-        cout << endl
-             << e.what() << "\n\n";
-        system("pause");
     }
 }
 
