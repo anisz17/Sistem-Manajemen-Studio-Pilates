@@ -17,14 +17,9 @@ void tanganiCtrlC(int signal)
     ExitProcess(signal);
 }
 
-void setupErrorHandling()
-{
-    signal(SIGINT, tanganiCtrlC);
-}
-
 int main()
 {
-    setupErrorHandling();
+    signal(SIGINT, tanganiCtrlC);
     SetConsoleOutputCP(65001);
 
     const int MAX_AKUN = 50;
@@ -34,23 +29,15 @@ int main()
 
     Akun dataAkun[MAX_AKUN];
     int jumlah = 0;
-
     Booking dataBooking[MAX_BOOKING];
     int jumlahBooking = 0;
-
     JadwalKelas dataJadwal[MAX_JADWAL];
     int jumlahJadwal = 0;
-
     TopUp dataTopUp[MAX_TOPUP];
     int jumlahTopUp = 0;
 
     muatAkun(dataAkun, jumlah);
     muatJadwal(dataJadwal, jumlahJadwal);
-
-    if (jumlahJadwal == 0)
-    {
-        simpanJadwal(dataJadwal, jumlahJadwal);
-    }
 
     Akun *ptrAkun = dataAkun;
     bool programAktif = true;
@@ -94,24 +81,9 @@ int main()
             cout << "2. 📝 Register\n";
             cout << "0. ❌ Keluar\n";
             cout << "--------------------------------------------\n";
-
             try
             {
-                string input;
-                cout << "🎯 Pilih menu (1/2/0): ";
-                getline(cin, input);
-
-                if (input.empty())
-                    throw invalid_argument("❌ Input tidak boleh kosong!\n");
-
-                for (char c : input)
-                {
-                    if (!isdigit(c))
-                        throw invalid_argument("❌ Input tidak valid!\n");
-                }
-
-                int pilihan = stoi(input);
-
+                int pilihan = inputMenu("🎯 Pilih menu (0-2): ");
                 if (pilihan == 1)
                     login(ptrAkun, jumlah, statusLogin, namaLogin, roleLogin);
                 else if (pilihan == 2)
@@ -160,7 +132,6 @@ int main()
             {
                 system("cls");
                 tampilkanLogoKecil();
-
                 cout << "============================================\n";
                 cout << "||            💼 MENU ADMIN 💼            ||\n";
                 cout << "============================================\n";
@@ -174,23 +145,9 @@ int main()
                 cout << "8. ✅ Approval Booking\n";
                 cout << "0. 🚪 Logout\n";
                 cout << "--------------------------------------------\n";
-
                 try
                 {
-                    string input;
-                    cout << "🎯 Pilih menu (0-8): ";
-                    getline(cin, input);
-
-                    if (input.empty())
-                        throw invalid_argument("❌ Input tidak boleh kosong!");
-
-                    for (char c : input)
-                    {
-                        if (!isdigit(c))
-                            throw invalid_argument("❌ Input tidak valid!");
-                    }
-
-                    int pilihan = stoi(input);
+                    int pilihan = inputMenu("🎯 Pilih menu (0-8): ");
 
                     if (pilihan == 1)
                     {
@@ -263,23 +220,9 @@ int main()
                 cout << "5. 📜 Riwayat Transaksi\n";
                 cout << "0. 🚪 Logout\n";
                 cout << "--------------------------------------------\n";
-
                 try
                 {
-                    string input;
-                    cout << "🎯 Pilih menu: ";
-                    getline(cin, input);
-
-                    if (input.empty())
-                        throw invalid_argument("❌ Input tidak boleh kosong!");
-
-                    for (char c : input)
-                    {
-                        if (!isdigit(c))
-                            throw invalid_argument("❌ Input tidak valid!");
-                    }
-
-                    int pilihan = stoi(input);
+                    int pilihan = inputMenu("🎯 Pilih menu (0-5): ");
 
                     if (pilihan == 1)
                     {
@@ -298,7 +241,7 @@ int main()
                     }
                     else if (pilihan == 4)
                     {
-                        batalkanBooking(dataBooking, namaLogin, jumlahBooking, ptrAkun, jumlah);
+                        batalkanBooking(dataBooking, namaLogin, jumlahBooking, ptrAkun, jumlah, dataJadwal, jumlahJadwal);
                         system("pause");
                     }
                     else if (pilihan == 5)
