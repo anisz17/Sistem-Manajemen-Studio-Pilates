@@ -88,7 +88,6 @@ int inputMenu(const string &prompt)
         if (!isdigit(c))
             throw invalid_argument("❌ Input tidak valid!\n");
     }
-
     return stoi(input);
 }
 
@@ -107,10 +106,10 @@ int inputInteger(const string &prompt)
     }
     if (input.length() > 10)
         throw invalid_argument("❌ Input terlalu besar!");
+
     int nilai = stoi(input);
     if (nilai <= 0)
-        throw invalid_argument("❌ Input tidak valid!");
-
+        throw invalid_argument("❌ Input harus lebih dari 0!");
     return nilai;
 }
 
@@ -132,7 +131,6 @@ bool inputYesNo(const string &prompt)
             return true;
         if (jawaban == 'n')
             return false;
-
         cout << "❌ Masukkan y atau n!\n";
     }
 }
@@ -153,21 +151,21 @@ void validasiHurufSpasi(const string &teks, const string &namaField, int minLen 
 {
     if (teks.empty())
         throw invalid_argument("❌ " + namaField + " tidak boleh kosong!\n");
-
     if ((int)teks.length() < minLen)
-        throw invalid_argument("❌ " + namaField + " minimal " + to_string(minLen) + " karakter!");
+        throw invalid_argument("❌ " + namaField + " minimal " + to_string(minLen) + " karakter!\n");
 
     for (char c : teks)
     {
         if (!isalpha((unsigned char)c) && c != ' ')
-            throw invalid_argument("❌ " + namaField + " hanya boleh huruf dan spasi!");
+            throw invalid_argument("❌ " + namaField + " hanya boleh huruf dan spasi!\n");
     }
 }
 
-vector<string> daftarHari = {
-    "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"};
 string pilihHari()
 {
+    vector<string> daftarHari = {
+        "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"};
+
     cout << "\n📅 Pilih Hari:\n";
     for (int i = 0; i < daftarHari.size(); i++)
         cout << i + 1 << ". " << daftarHari[i] << endl;
@@ -186,7 +184,6 @@ string pilihHari()
 
     if (pilih < 1 || pilih > daftarHari.size())
         throw invalid_argument("\n❌ Pilihan tidak valid!");
-
     return daftarHari[pilih - 1];
 }
 
@@ -199,7 +196,6 @@ void validasiFormatJam(string jam)
 
     int h = stoi(jam.substr(0, 2));
     int m = stoi(jam.substr(3, 2));
-
     if (h < 0 || h > 23 || m < 0 || m > 59)
         throw invalid_argument("❌ Jam tidak valid");
 }
@@ -208,7 +204,6 @@ void validasiRentangJam(string mulai, string selesai)
 {
     int m1 = stoi(mulai.substr(0, 2)) * 60 + stoi(mulai.substr(3, 2));
     int m2 = stoi(selesai.substr(0, 2)) * 60 + stoi(selesai.substr(3, 2));
-
     if (m2 <= m1)
         throw invalid_argument("❌ Jam selesai harus lebih besar");
 }
@@ -216,7 +211,6 @@ void validasiRentangJam(string mulai, string selesai)
 string inputJam()
 {
     string mulai, selesai;
-
     while (true)
     {
         try
@@ -225,7 +219,6 @@ string inputJam()
             getline(cin, mulai);
             cout << "🕐 Jam Selesai: ";
             getline(cin, selesai);
-
             if (mulai.empty() || selesai.empty())
                 throw invalid_argument("❌ Jam tidak boleh kosong");
 
@@ -318,7 +311,7 @@ void muatAkun(Akun *data, int &jumlah)
     getline(file, baris);
     jumlah = 0;
 
-    while (getline(file, baris) && jumlah < 20)
+    while (getline(file, baris) && jumlah < 50)
     {
         stringstream ss(baris);
         string token;
@@ -365,12 +358,11 @@ void muatJadwal(JadwalKelas *data, int &jumlah)
         jumlah = 0;
         return;
     }
-
     string baris;
     getline(file, baris);
     jumlah = 0;
 
-    while (getline(file, baris) && jumlah < 30)
+    while (getline(file, baris) && jumlah < 50)
     {
         stringstream ss(baris);
         string token;
