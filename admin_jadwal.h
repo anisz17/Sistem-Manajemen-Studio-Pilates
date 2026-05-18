@@ -7,6 +7,7 @@ void tambahJadwal(JadwalKelas *dataJadwal, int &jumlahJadwal, int maxJadwal)
 {
     system("cls");
     tampilkanLogoKecil();
+
     cout << "===========================================================\n";
     cout << "||               ➕ TAMBAH JADWAL KELAS ➕               ||\n";
     cout << "===========================================================\n";
@@ -29,11 +30,9 @@ void tambahJadwal(JadwalKelas *dataJadwal, int &jumlahJadwal, int maxJadwal)
         string instrukturInput;
         cout << "👩👨 Instruktur: ";
         getline(cin, instrukturInput);
-        validasiHurufSpasi(instrukturInput, "Instruktur");
+        validasiHurufSpasi(instrukturInput, "Instruktur", 3);
         if (instrukturInput.length() > 30)
             throw invalid_argument("❌ Nama instruktur terlalu panjang! Maksimal 30 karakter.");
-        if (instrukturInput.length() < 3)
-            throw invalid_argument("❌ Nama instruktur terlalu pendek! Minimal 3 karakter.");
 
         int hargaInput = inputInteger("💰 Harga Kelas: Rp ");
         if (kategoriInput == "private" && hargaInput < 500000)
@@ -176,6 +175,7 @@ void updateJadwal(JadwalKelas *dataJadwal, int jumlahJadwal)
 {
     system("cls");
     tampilkanLogoKecil();
+
     cout << "====================================================\n";
     cout << "||             ✏️ UPDATE JADWAL KELAS ✏️          ||\n";
     cout << "====================================================\n";
@@ -198,7 +198,6 @@ void updateJadwal(JadwalKelas *dataJadwal, int jumlahJadwal)
             cout << "\n===============================================\n";
             cout << "||          📝 MASUKKAN DATA BARU 📝         ||\n";
             cout << "===============================================\n";
-
             try
             {
                 if (inputYesNo("📅 Ubah Hari? (y/n): "))
