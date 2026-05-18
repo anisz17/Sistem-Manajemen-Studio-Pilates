@@ -21,7 +21,6 @@ void ProfilSaya(Akun *data, int jumlah, string namaLogin)
         cout << "🔑 Password" << ": " << data[index].pw << "\n";
         cout << "💰 Saldo" << "   : " << formatRupiah(data[index].saldo) << "\n";
         cout << "====================================================\n";
-
         cout << "\n🔧 Ingin mengubah password ?\n";
         cout << "   1. ✅ Ya, ganti password\n";
         cout << "   0. ❌ Tidak, kembali\n";
@@ -64,17 +63,12 @@ void ProfilSaya(Akun *data, int jumlah, string namaLogin)
 
             data[index].pw = pwBaru;
             simpanAkun(data, jumlah);
-
             loadingAnimation();
             cout << "✅ Password berhasil diubah!\n\n";
         }
         else if (pilihan == 0)
         {
             cout << "🔙 Kembali ke menu utama...\n\n";
-        }
-        else
-        {
-            cout << "❌ Pilihan tidak valid!\n\n";
         }
     }
     catch (const exception &e)
@@ -90,42 +84,25 @@ void topUpSaldo(Akun *data, int jumlah, string namaLogin, TopUp *dataTopUp, int 
     cout << "====================================================\n";
     cout << "||               💳 TOP UP SALDO 💳               ||\n";
     cout << "====================================================\n";
-
     try
     {
         int index = cariusername(data, jumlah, namaLogin);
         if (index == -1)
             throw invalid_argument("❌ Akun tidak ditemukan!");
-
         cout << "💰 Saldo saat ini: " << formatRupiah(data[index].saldo) << endl;
         cout << "----------------------------------------------------\n";
 
-        int nominal = 0;
-        string inputNominal;
-
-        cout << "💵 Nominal top up: Rp ";
-        getline(cin, inputNominal);
-        if (inputNominal.empty())
-            throw invalid_argument("❌ Input tidak boleh kosong!");
-        for (char c : inputNominal)
-            if (!isdigit(c))
-                throw invalid_argument("❌ Input tidak valid!");
-
-        if (inputNominal.length() > 10)
-            throw invalid_argument("❌ Nominal terlalu besar!");
-
-        nominal = stoi(inputNominal);
-        if (nominal <= 10000)
-            throw invalid_argument("❌ Nominal harus lebih dari Rp 10.000!");
+        int nominal = inputInteger("💳 Masukkan nominal top up: Rp ");
+        if (nominal < 10000)
+            throw invalid_argument("❌ Nominal minimal Rp 10.000!\n");
         if (nominal > 10000000)
-            throw invalid_argument("❌ Nominal terlalu besar!");
+            throw invalid_argument("❌ Nominal terlalu besar! Maksimal Rp 10.000.000.\n");
 
-        data[index].saldo += (int)nominal;
-
+        data[index].saldo += nominal;
         if (jumlahTopUp < maxTopUp)
         {
             dataTopUp[jumlahTopUp].namaMember = namaLogin;
-            dataTopUp[jumlahTopUp].nominal = (int)nominal;
+            dataTopUp[jumlahTopUp].nominal = nominal;
             jumlahTopUp++;
         }
 
@@ -133,6 +110,7 @@ void topUpSaldo(Akun *data, int jumlah, string namaLogin, TopUp *dataTopUp, int 
         cout << "✅ Top up berhasil!\n";
         cout << "💰 Saldo baru: " << formatRupiah(data[index].saldo) << endl
              << endl;
+        simpanAkun(data, jumlah);
     }
     catch (const exception &e)
     {
@@ -148,11 +126,9 @@ void bookingKelas(Akun *data, int jumlahAkun, string namaLogin, Booking *dataBoo
     cout << "====================================================\n";
     cout << "||               📝 BOOKING KELAS 📝              ||\n";
     cout << "====================================================\n";
-
     try
     {
         validasiKapasitas(jumlahBooking, maxBooking);
-
         int indexMember = cariusername(data, jumlahAkun, namaLogin);
         if (indexMember == -1)
             throw invalid_argument("❌ Akun tidak ditemukan!");
@@ -161,7 +137,6 @@ void bookingKelas(Akun *data, int jumlahAkun, string namaLogin, Booking *dataBoo
 
         cout << "💰 Saldo Anda: " << formatRupiah(data[indexMember].saldo) << endl;
         tampilkanDaftarJadwal(dataJadwal, jumlahJadwal);
-
         int jadwalID = inputInteger("\n🆔 Masukkan ID Jadwal yang ingin dibooking: ");
         int indexJadwal = -1;
         for (int i = 0; i < jumlahJadwal; i++)
@@ -175,7 +150,6 @@ void bookingKelas(Akun *data, int jumlahAkun, string namaLogin, Booking *dataBoo
 
         if (indexJadwal == -1)
             throw invalid_argument("❌ ID Jadwal tidak ditemukan!");
-
         if (dataJadwal[indexJadwal].terisi >= dataJadwal[indexJadwal].kapasitas)
             throw invalid_argument("⚠️ Kelas sudah penuh!");
 
@@ -190,7 +164,6 @@ void bookingKelas(Akun *data, int jumlahAkun, string namaLogin, Booking *dataBoo
         }
 
         int harga = dataJadwal[indexJadwal].harga;
-
         if (data[indexMember].saldo < harga)
             throw invalid_argument("❌ Saldo tidak cukup! Silakan top up terlebih dahulu.");
 
@@ -223,6 +196,8 @@ void bookingKelas(Akun *data, int jumlahAkun, string namaLogin, Booking *dataBoo
         cout << "⏳ Status       : Menunggu Approval Admin" << endl;
         cout << "💵 Saldo Tersisa: " << formatRupiah(data[indexMember].saldo) << endl;
         cout << "=============================================\n\n";
+        simpanAkun(data, jumlahAkun);
+        simpanJadwal(dataJadwal, jumlahJadwal);
     }
     catch (const exception &e)
     {
@@ -231,14 +206,14 @@ void bookingKelas(Akun *data, int jumlahAkun, string namaLogin, Booking *dataBoo
     }
 }
 
-void batalkanBooking(Booking *dataBooking, string namaLogin, int &jumlahBooking, Akun *dataAkun, int jumlahAkun)
+void batalkanBooking(Booking *dataBooking, string namaLogin, int &jumlahBooking, Akun *dataAkun, int jumlahAkun,
+                     JadwalKelas *dataJadwal, int jumlahJadwal)
 {
     system("cls");
     tampilkanLogoKecil();
     cout << "==============================================================\n";
     cout << "||                ❌ BATALKAN BOOKING KELAS ❌              ||\n";
     cout << "==============================================================\n";
-
     try
     {
         cout << left << setw(15) << "ID Booking " << setw(20) << "Kelas" << setw(15) << "Harga" << "Status" << endl;
@@ -250,10 +225,8 @@ void batalkanBooking(Booking *dataBooking, string namaLogin, int &jumlahBooking,
             if (dataBooking[i].namaMember == namaLogin && dataBooking[i].status == "pending")
             {
                 adaPending = true;
-                cout << left << setw(12) << dataBooking[i].bookingID
-                     << setw(20) << dataBooking[i].jenisKelas
-                     << setw(20) << "💰 " + formatRupiah(dataBooking[i].harga)
-                     << "⏳ " << dataBooking[i].status << endl;
+                cout << left << setw(12) << dataBooking[i].bookingID << setw(20) << dataBooking[i].jenisKelas
+                     << setw(20) << "💰 " + formatRupiah(dataBooking[i].harga) << "⏳ " << dataBooking[i].status << endl;
             }
         }
 
@@ -276,7 +249,6 @@ void batalkanBooking(Booking *dataBooking, string namaLogin, int &jumlahBooking,
                 break;
             }
         }
-
         if (index == -1)
             throw invalid_argument("❌ Booking tidak ditemukan!");
 
@@ -290,12 +262,23 @@ void batalkanBooking(Booking *dataBooking, string namaLogin, int &jumlahBooking,
         cout << "---------------------------------------------\n";
 
         dataBooking[index].status = "canceled";
+        int jadwalID = dataBooking[index].jadwalID;
+        for (int i = 0; i < jumlahJadwal; i++)
+        {
+            if (dataJadwal[i].jadwalID == jadwalID)
+            {
+                dataJadwal[i].terisi--;
+                break;
+            }
+        }
         int indexMember = cariusername(dataAkun, jumlahAkun, namaLogin);
         if (indexMember != -1)
         {
             dataAkun[indexMember].saldo += dataBooking[index].harga;
             cout << "\n✅ Booking berhasil dibatalkan! 💰 Saldo dikembalikan.\n";
         }
+        simpanAkun(dataAkun, jumlahAkun);
+        simpanJadwal(dataJadwal, jumlahJadwal);
     }
     catch (const exception &e)
     {
@@ -313,13 +296,12 @@ void riwayatTransaksi(Booking *dataBooking, int jumlahBooking, TopUp *dataTopUp,
     cout << "======================================================================================\n";
     cout << left << setw(20) << "Jenis Transaksi " << setw(35) << "Keterangan " << setw(20) << "Nominal " << setw(10) << "Status " << endl;
     cout << "======================================================================================\n";
-
-    bool AdaData = false;
+    bool adaData = false;
     for (int i = 0; i < jumlahTopUp; i++)
     {
         if (dataTopUp[i].namaMember == namaLogin)
         {
-            AdaData = true;
+            adaData = true;
             cout << left << setw(20) << "💳 Top Up" << setw(35) << "Saldo ditambah"
                  << setw(20) << "➕ " + formatRupiah(dataTopUp[i].nominal)
                  << setw(10) << "✅ Berhasil" << endl;
@@ -330,7 +312,7 @@ void riwayatTransaksi(Booking *dataBooking, int jumlahBooking, TopUp *dataTopUp,
     {
         if (dataBooking[i].namaMember == namaLogin)
         {
-            AdaData = true;
+            adaData = true;
             string keterangan = "Booking " + dataBooking[i].jenisKelas;
 
             string nominal;
@@ -348,13 +330,11 @@ void riwayatTransaksi(Booking *dataBooking, int jumlahBooking, TopUp *dataTopUp,
                 status = "❌ Canceled";
             else
                 status = "❌ Rejected";
-
             cout << left << setw(20) << "📝 Booking" << setw(35) << keterangan
                  << setw(20) << nominal << setw(10) << status << endl;
         }
     }
-
-    if (!AdaData)
+    if (!adaData)
         cout << "❌ Belum ada riwayat transaksi.\n";
     cout << "======================================================================================\n";
 }
