@@ -2,7 +2,6 @@
 #define ADMIN_JADWAL_H
 
 #include "utils.h"
-#include <limits>
 
 void tambahJadwal(JadwalKelas *dataJadwal, int &jumlahJadwal, int maxJadwal)
 {
@@ -31,23 +30,17 @@ void tambahJadwal(JadwalKelas *dataJadwal, int &jumlahJadwal, int maxJadwal)
         string instrukturInput;
         cout << "👩👨 Instruktur: ";
         getline(cin, instrukturInput);
-        validasiHurufSpasi(instrukturInput, "Instruktur");
+        validasiHurufSpasi(instrukturInput, "Instruktur", 3);
         if (instrukturInput.length() > 30)
             throw invalid_argument("❌ Nama instruktur terlalu panjang! Maksimal 30 karakter.");
-        if (instrukturInput.length() < 3)
-            throw invalid_argument("❌ Nama instruktur terlalu pendek! Minimal 3 karakter.");
 
         int hargaInput = inputInteger("💰 Harga Kelas: Rp ");
-        if (hargaInput <= 0)
-            throw invalid_argument("❌ Harga harus lebih dari 0!");
         if (kategoriInput == "private" && hargaInput < 500000)
             throw invalid_argument("❌ Harga untuk kelas private minimal Rp 500.000!");
         if (kategoriInput == "reguler" && hargaInput < 200000)
             throw invalid_argument("❌ Harga untuk kelas reguler minimal Rp 200.000!");
 
         int kapasitasInput = inputInteger("👥 Kapasitas Peserta: ");
-        if (kapasitasInput <= 0)
-            throw invalid_argument("❌ Kapasitas harus lebih dari 0!");
         if (kategoriInput == "private" && kapasitasInput > 5)
             throw invalid_argument("❌ Kapasitas untuk kelas private maksimal 5!");
         if (kategoriInput == "reguler" && kapasitasInput > 20)
@@ -88,7 +81,7 @@ void lihatJadwal(JadwalKelas *dataJadwal, int jumlahJadwal)
     cout << "====================================================\n";
     cout << "||            📋 LIHAT JADWAL KELAS 📋            ||\n";
     cout << "====================================================\n";
-    JadwalKelas temp[30];
+    JadwalKelas temp[50];
     for (int i = 0; i < jumlahJadwal; i++)
         temp[i] = dataJadwal[i];
 
@@ -102,47 +95,16 @@ void lihatJadwal(JadwalKelas *dataJadwal, int jumlahJadwal)
             swap(temp[i], temp[minIndex]);
     }
 
-    cout << "==========================================================================================================\n";
-    cout << "||                                    📅 DAFTAR JADWAL KELAS 📅                                         ||\n";
-    cout << "==========================================================================================================\n";
-    cout << left
-         << setw(5) << "ID"
-         << setw(10) << "Hari"
-         << setw(15) << "Jam"
-         << setw(18) << "Jenis"
-         << setw(15) << "Kategori"
-         << setw(15) << "Instruktur"
-         << setw(12) << "Harga"
-         << "Kapasitas" << endl;
-    cout << "----------------------------------------------------------------------------------------------------------\n";
-
-    if (jumlahJadwal == 0)
-        cout << "❌ Belum ada data jadwal!\n";
-    else
-        for (int i = 0; i < jumlahJadwal; i++)
-        {
-            int sisa = temp[i].kapasitas - temp[i].terisi;
-            cout << left << setw(5) << temp[i].jadwalID;
-            cout << setw(10) << temp[i].hari;
-            cout << setw(15) << temp[i].jam;
-            cout << setw(18) << temp[i].jenisKelas;
-            cout << setw(15) << temp[i].kategori;
-            cout << setw(15) << temp[i].instruktur;
-            cout << setw(12) << formatRupiah(temp[i].harga);
-            cout << temp[i].terisi << "/" << temp[i].kapasitas
-                 << " (sisa " << sisa << ")" << endl;
-        }
+    tampilkanDaftarJadwal(temp, jumlahJadwal);
 
     cout << "==========================================================================================================\n\n";
     cout << "🔍 Ingin mencari jadwal berdasarkan ID?\n";
     cout << "   1. ✅ Ya, cari jadwal\n";
     cout << "   0. ⬅️ Kembali\n";
     cout << "----------------------------------------------------\n";
-
     try
     {
         int pilihan = inputMenu(" 🎯 Pilihan (1/0): ");
-
         if (pilihan == 1)
         {
             system("cls");
@@ -236,7 +198,6 @@ void updateJadwal(JadwalKelas *dataJadwal, int jumlahJadwal)
             cout << "\n===============================================\n";
             cout << "||          📝 MASUKKAN DATA BARU 📝         ||\n";
             cout << "===============================================\n";
-
             try
             {
                 if (inputYesNo("📅 Ubah Hari? (y/n): "))
@@ -276,23 +237,20 @@ void updateJadwal(JadwalKelas *dataJadwal, int jumlahJadwal)
                 if (inputYesNo("💰 Ubah Harga? (y/n): "))
                 {
                     int hargaBaru = inputInteger("💰 Harga baru: ");
-                    if (hargaBaru <= 0)
-                        throw invalid_argument("❌ Harga harus lebih dari 0!\n");
-                    if (hargaBaru > 5000000)
-                        throw invalid_argument("❌ Harga terlalu besar! Maksimal Rp 5.000.000.\n");
-                    if (hargaBaru <= 100000)
-                        throw invalid_argument("❌ Harga terlalu kecil! Minimal Rp 100.000!\n");
+                    if (dataJadwal[i].kategori == "private" && hargaBaru < 500000)
+                        throw invalid_argument("❌ Harga untuk kelas private minimal Rp 500.000!\n");
+                    if (dataJadwal[i].kategori == "reguler" && hargaBaru < 200000)
+                        throw invalid_argument("❌ Harga untuk kelas reguler minimal Rp 200.000!\n");
                     dataJadwal[i].harga = hargaBaru;
                 }
 
                 if (inputYesNo("👥 Ubah Kapasitas? (y/n): "))
                 {
-
                     int kapasitasBaru = inputInteger("👥 Kapasitas baru: ");
-                    if (kapasitasBaru <= 0)
-                        throw invalid_argument("❌ Kapasitas harus lebih dari 0!\n");
-                    if (kapasitasBaru > 20)
-                        throw invalid_argument("❌ Kapasitas terlalu besar! Maksimal 20.\n");
+                    if (dataJadwal[i].kategori == "private" && kapasitasBaru > 5)
+                        throw invalid_argument("❌ Kapasitas maksimal 5 untuk kelas private.\n");
+                    if (dataJadwal[i].kategori == "reguler" && kapasitasBaru > 20)
+                        throw invalid_argument("❌ Kapasitas maksimal 20 untuk kelas reguler.\n");
                     if (kapasitasBaru < dataJadwal[i].terisi)
                         throw invalid_argument("❌ Kapasitas baru tidak boleh kurang dari jumlah peserta yang sudah terisi!\n");
                     dataJadwal[i].kapasitas = kapasitasBaru;
@@ -455,6 +413,7 @@ void approvalBooking(Booking *dataBooking, int jumlahBooking, Akun *dataAkun, in
         }
         else
             throw out_of_range("❌ Pilihan tidak valid!");
+        simpanAkun(dataAkun, jumlahAkun);
     }
     catch (const exception &e)
     {
