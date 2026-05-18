@@ -93,8 +93,6 @@ void registrasi(Akun *data, int &jumlah, int maxKapasitas)
     {
         validasiKapasitas(jumlah, maxKapasitas);
         string namaBaru, pwBaru;
-        bool namaValid = false;
-
         cout << "👤 Masukkan Nama Member : ";
         getline(cin, namaBaru);
         trimSpasi(namaBaru);
@@ -102,10 +100,8 @@ void registrasi(Akun *data, int &jumlah, int maxKapasitas)
 
         if (cariusername(data, jumlah, namaBaru) != -1)
             throw invalid_argument("❌ Username sudah terdaftar.");
-
-        namaValid = true;
         cout << "✅ Username valid!\n\n";
-        
+
         bool passwordValid = false;
         while (!passwordValid)
         {
