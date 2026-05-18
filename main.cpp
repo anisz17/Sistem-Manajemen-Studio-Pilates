@@ -183,7 +183,7 @@ int main()
                     }
                     else if (pilihan == 8)
                     {
-                        approvalBooking(dataBooking, jumlahBooking, ptrAkun, jumlah);
+                        approvalBooking(dataBooking, jumlahBooking, ptrAkun, jumlah, dataJadwal, jumlahJadwal);
                         system("pause");
                     }
                     else if (pilihan == 0)

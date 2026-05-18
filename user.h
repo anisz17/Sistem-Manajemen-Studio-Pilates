@@ -267,6 +267,7 @@ void batalkanBooking(Booking *dataBooking, string namaLogin, int &jumlahBooking,
         {
             if (dataJadwal[i].jadwalID == jadwalID)
             {
+                if (dataJadwal[i].terisi > 0)
                 dataJadwal[i].terisi--;
                 break;
             }

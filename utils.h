@@ -137,7 +137,7 @@ bool inputYesNo(const string &prompt)
 
 void validasiKapasitas(int jumlah, int maxKapasitas)
 {
-    if (jumlah >= maxKapasitas)
+    if (jumlah > maxKapasitas)
         throw invalid_argument("⚠️ Kapasitas penuh!");
 }
 
