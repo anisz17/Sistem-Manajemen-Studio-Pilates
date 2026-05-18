@@ -7,7 +7,6 @@ void tambahJadwal(JadwalKelas *dataJadwal, int &jumlahJadwal, int maxJadwal)
 {
     system("cls");
     tampilkanLogoKecil();
-
     cout << "===========================================================\n";
     cout << "||               ➕ TAMBAH JADWAL KELAS ➕               ||\n";
     cout << "===========================================================\n";
@@ -30,9 +29,11 @@ void tambahJadwal(JadwalKelas *dataJadwal, int &jumlahJadwal, int maxJadwal)
         string instrukturInput;
         cout << "👩👨 Instruktur: ";
         getline(cin, instrukturInput);
-        validasiHurufSpasi(instrukturInput, "Instruktur", 3);
+        validasiHurufSpasi(instrukturInput, "Instruktur");
         if (instrukturInput.length() > 30)
             throw invalid_argument("❌ Nama instruktur terlalu panjang! Maksimal 30 karakter.");
+        if (instrukturInput.length() < 3)
+            throw invalid_argument("❌ Nama instruktur terlalu pendek! Minimal 3 karakter.");
 
         int hargaInput = inputInteger("💰 Harga Kelas: Rp ");
         if (kategoriInput == "private" && hargaInput < 500000)
@@ -175,7 +176,6 @@ void updateJadwal(JadwalKelas *dataJadwal, int jumlahJadwal)
 {
     system("cls");
     tampilkanLogoKecil();
-
     cout << "====================================================\n";
     cout << "||             ✏️ UPDATE JADWAL KELAS ✏️          ||\n";
     cout << "====================================================\n";
@@ -230,7 +230,9 @@ void updateJadwal(JadwalKelas *dataJadwal, int jumlahJadwal)
                     string instruktur;
                     cout << "👩👨 Instruktur Baru: ";
                     getline(cin, instruktur);
-                    validasiHurufSpasi(instruktur, "Instruktur");
+                    validasiHurufSpasi(instruktur, "Instruktur", 3);
+                    if (instruktur.length() > 30)
+                        throw invalid_argument("❌ Nama instruktur terlalu panjang! Maksimal 30 karakter.");
                     dataJadwal[i].instruktur = instruktur;
                 }
 
