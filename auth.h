@@ -26,6 +26,8 @@ void login(Akun *data, int jumlah, bool &statusLogin, string &namaLogin, string 
                     getline(cin, inputNama);
                     validasiHurufSpasi(inputNama, "Username", 4);
                     trimSpasi(inputNama);
+                    for (int i = 0; i < inputNama.length(); i++)
+                        inputNama[i] = tolower(inputNama[i]);
                     usernameValid = true;
                 }
                 catch (const exception &e)
@@ -33,7 +35,6 @@ void login(Akun *data, int jumlah, bool &statusLogin, string &namaLogin, string 
                     cout << e.what() << "\n";
                 }
             }
-
             cout << "🔑 Masukkan Password : ";
             getline(cin, inputpw);
             validasiPassword(inputpw);
@@ -98,10 +99,11 @@ void registrasi(Akun *data, int &jumlah, int maxKapasitas)
         trimSpasi(namaBaru);
         validasiHurufSpasi(namaBaru, "Nama Member", 4);
 
+        for (int i = 0; i < namaBaru.length(); i++)
+            namaBaru[i] = tolower(namaBaru[i]);
         if (cariusername(data, jumlah, namaBaru) != -1)
             throw invalid_argument("❌ Username sudah terdaftar.");
         cout << "✅ Username valid!\n\n";
-
         bool passwordValid = false;
         while (!passwordValid)
         {
@@ -133,7 +135,6 @@ void registrasi(Akun *data, int &jumlah, int maxKapasitas)
         jumlah++;
 
         simpanAkun(data, jumlah);
-
         loadingAnimation();
         cout << "✅ Member Berhasil Ditambahkan!\n";
         cout << "🆔 ID Member: " << newID << "\n\n";

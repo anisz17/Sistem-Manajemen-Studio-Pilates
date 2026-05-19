@@ -166,7 +166,6 @@ void bookingKelas(Akun *data, int jumlahAkun, string namaLogin, Booking *dataBoo
         int harga = dataJadwal[indexJadwal].harga;
         if (data[indexMember].saldo < harga)
             throw invalid_argument("❌ Saldo tidak cukup! Silakan top up terlebih dahulu.");
-
         int newBookingID = 1;
         for (int i = 0; i < jumlahBooking; i++)
             if (dataBooking[i].bookingID >= newBookingID)

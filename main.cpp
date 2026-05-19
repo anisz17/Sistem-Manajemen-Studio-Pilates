@@ -158,7 +158,7 @@ int main()
                         lihatMember(ptrAkun, jumlah, true);
                     else if (pilihan == 3)
                     {
-                        hapusMember(ptrAkun, jumlah);
+                        hapusMember(ptrAkun, jumlah, dataBooking, jumlahBooking);
                         system("pause");
                     }
                     else if (pilihan == 4)

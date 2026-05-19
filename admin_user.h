@@ -20,6 +20,8 @@ void tambahMember(Akun *data, int &jumlah, int maxKapasitas)
         trimSpasi(namaBaru);
         validasiHurufSpasi(namaBaru, "Nama Member", 4);
 
+        for (int i = 0; i < namaBaru.length(); i++)
+            namaBaru[i] = tolower(namaBaru[i]);
         if (cariusername(data, jumlah, namaBaru) != -1)
             throw invalid_argument("❌ Username sudah terdaftar.");
         cout << "✅ Username valid!\n\n";
@@ -55,7 +57,6 @@ void tambahMember(Akun *data, int &jumlah, int maxKapasitas)
         jumlah++;
 
         simpanAkun(data, jumlah);
-
         loadingAnimation();
         cout << "✅ Member Berhasil Ditambahkan!\n";
         cout << "🆔 ID Member: " << newID << "\n\n";
@@ -74,7 +75,6 @@ void lihatMember(Akun *data, int jumlah)
     cout << "=====================================================\n";
     cout << "||             👀 LIHAT DATA MEMBER 👀             ||\n";
     cout << "=====================================================\n";
-
     try
     {
         Akun temp[50];
@@ -103,10 +103,8 @@ void lihatMember(Akun *data, int jumlah)
             throw invalid_argument("❌ Belum ada data member.");
         else
             for (int i = 0; i < memberCount; i++)
-                cout << left << setw(8) << temp[i].id
-                     << setw(20) << temp[i].nama
+                cout << left << setw(8) << temp[i].id << setw(20) << temp[i].nama
                      << setw(20) << "💰 " + formatRupiah(temp[i].saldo) << "\n";
-
         cout << "====================================================\n\n";
     }
     catch (const exception &e)
@@ -162,11 +160,9 @@ void lihatMember(Akun *data, int jumlah, bool denganPencarian)
         cout << "   1. ✅ Ya, cari member\n";
         cout << "   0. ⬅️ Kembali\n";
         cout << "----------------------------------------------------\n";
-
         try
         {
             int pilihan = inputMenu(" 🎯 Pilihan (1/0): ");
-
             if (pilihan == 1)
             {
                 system("cls");
@@ -174,7 +170,6 @@ void lihatMember(Akun *data, int jumlah, bool denganPencarian)
                 cout << "====================================================\n";
                 cout << "||        🔎 CARI MEMBER BERDASARKAN ID 🔎        ||\n";
                 cout << "====================================================\n";
-
                 tampilkanDaftarMember(data, jumlah);
 
                 int targetID;
@@ -238,7 +233,7 @@ void lihatMember(Akun *data, int jumlah, bool denganPencarian)
     }
 }
 
-void hapusMember(Akun *data, int &jumlah)
+void hapusMember(Akun *data, int &jumlah, Booking *dataBooking, int jumlahBooking)
 {
     system("cls");
     tampilkanLogoKecil();
@@ -246,7 +241,6 @@ void hapusMember(Akun *data, int &jumlah)
     cout << "||               🗑️ HAPUS MEMBER 🗑️               ||\n";
     cout << "====================================================\n";
     tampilkanDaftarMember(data, jumlah);
-
     try
     {
         int IDHapus = inputInteger("\n🆔 Masukkan ID member yang ingin dihapus: ");
@@ -255,15 +249,19 @@ void hapusMember(Akun *data, int &jumlah)
         int index = cariID(data, jumlah, IDHapus);
         if (index == -1)
             throw invalid_argument("❌ Member dengan ID tersebut tidak ditemukan!");
+        string namaMember = data[index].nama;
+        for (int i = 0; i < jumlahBooking; i++)
+        {
+            if (dataBooking[i].namaMember == namaMember && dataBooking[i].status == "pending")
+                throw invalid_argument("❌ Member ini memiliki booking aktif. Tidak bisa dihapus!");
+        }
 
         cout << "\n🗑️   Menghapus member: " << data[index].nama << "\n";
-
         for (int j = index; j < jumlah - 1; j++)
             data[j] = data[j + 1];
         jumlah--;
 
         simpanAkun(data, jumlah);
-
         loadingAnimation();
         cout << "✅ Data member berhasil dihapus!\n\n";
     }

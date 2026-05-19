@@ -104,8 +104,6 @@ int inputInteger(const string &prompt)
         if (!isdigit(c))
             throw invalid_argument("❌ Input tidak valid!\n");
     }
-    if (input.length() > 10)
-        throw invalid_argument("❌ Input terlalu besar!");
 
     int nilai = stoi(input);
     if (nilai <= 0)
@@ -206,6 +204,10 @@ void validasiRentangJam(string mulai, string selesai)
     int m2 = stoi(selesai.substr(0, 2)) * 60 + stoi(selesai.substr(3, 2));
     if (m2 <= m1)
         throw invalid_argument("❌ Jam selesai harus lebih besar");
+    if (m2 - m1 < 30)
+        throw invalid_argument("❌ Durasi minimal 30 menit");
+    if (m2 - m1 > 90)
+        throw invalid_argument("❌ Durasi maksimal 1.5 jam");
 }
 
 string inputJam()
@@ -310,7 +312,6 @@ void muatAkun(Akun *data, int &jumlah)
     string baris;
     getline(file, baris);
     jumlah = 0;
-
     while (getline(file, baris) && jumlah < 50)
     {
         stringstream ss(baris);
