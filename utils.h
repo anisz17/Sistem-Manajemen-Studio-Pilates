@@ -83,6 +83,8 @@ int inputMenu(const string &prompt)
 
     if (input.empty())
         throw invalid_argument("❌ Input tidak boleh kosong!");
+    if (input.length() > 1 && input[0] == '0')
+        throw invalid_argument("❌ Input tidak valid!");
     for (char c : input)
     {
         if (!isdigit(c))
